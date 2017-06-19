@@ -1,0 +1,109 @@
+html, body, .container {
+    height:100%;
+}
+
+.node {
+    cursor: pointer;
+}
+
+.overlay{
+    background-color:#EEE;
+}
+ 
+.node circle {
+    fill: #fff;
+    stroke: steelblue;
+    stroke-width: 1.5px;
+}
+ 
+.node text {
+    font-size:1 em; 
+    font-family:sans-serif;
+}
+ 
+.link {
+    fill: none;
+    stroke: #ccc;
+    stroke-width: 1.5px;
+}
+
+.templink {
+    fill: none;
+    stroke: red;
+    stroke-width: 3px;
+}
+
+.ghostCircle.show{
+    display:block;
+}
+
+.ghostCircle, .activeDrag .ghostCircle{
+     display: none;
+}
+
+.hidden {
+    display: none;
+}
+
+.left-panel{
+    background-color:white;
+    border-right: 1px solid grey;
+    max-width: 250px;
+}
+
+.right-panel{
+    display: block; 
+}
+
+.container {
+    display:table;
+    width: 100%;
+    padding: 0; /*set left/right padding according to needs*/
+    box-sizing: border-box;
+}
+
+.consequence-types{
+    margin-top: 15px;
+}
+
+.form-group-con-type-disable{
+    margin-bottom: 0px;
+}
+
+.row {
+    height: 100%;
+    display: table-row;
+}
+
+.row .no-float {
+    display: table-cell;
+    float: none;
+}
+
+.glyphicon-margin{
+    margin-right: 4px;
+}
+
+.create-button {
+    width: 100%;
+    margin-bottom: 6px;
+    background-color: lightsteelblue;
+}
+
+.welcome-section {
+    margin-bottom: 10px;
+    display: inline-flex;
+}
+
+.copyright {
+    text-align: center;
+    font-size: 12px;
+}
+
+.policies {
+    margin-top: 8px;
+}
+
+.cb-margin {
+    margin-left: 20px;
+}

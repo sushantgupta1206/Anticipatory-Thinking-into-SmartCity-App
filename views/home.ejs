@@ -1,0 +1,221 @@
+<!doctype html>
+<html>
+<head>
+	<meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>AT for City Planning</title>
+    <link rel="icon" type="image/png" href="images/planning.png" />
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <link rel="stylesheet" href="/css/styles.css">
+    <link rel="stylesheet" href="css/d3-context-menu.css" />
+    <link rel="stylesheet" href="css/app.css" />
+
+    <script src="/js/d3.min.js"></script>
+    <script src="/js/dndTree.js"></script>
+    <script src="/js/tree_data.js"></script>
+    <script src="/js/d3-context-menu.js"></script>
+    <script src="/js/underscore-min.js"></script>
+    <script src="/js/jquery.js"></script>
+    <script src="/js/fastclick.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>    
+</head>
+<body>
+    <!-- Create new Modal -->
+    <div id="createNewModal" class="modal fade" role="dialog">
+        <div class="modal-dialog">
+            <!-- Modal content-->
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">Create new Consequence</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group form-group-con-type-disable">
+                        <input type="text" class="form-control" id="newEffectName" placeholder="Consequence Name">
+                        <div class="consequence-types">
+                            Consequence Type:
+                            <label class="radio-inline">
+                                <input type = "radio" name="con-type" value = 'positive'>Positive
+                            </label>
+                            <label class="radio-inline">
+                                <input type = "radio" name="con-type" value = 'neutral'>Neutral
+                            </label>
+                            <label class="radio-inline">
+                                <input type = "radio" name="con-type" value = 'negative'>Negative
+                            </label>
+                        </div>
+                    </div>
+                                          
+                    <div class="policies">
+                        Tag Policy:
+                        <label class="checkbox cb-margin">
+                            <input type = "checkbox" name="policy">Policy One
+                        </label>
+                        <label class="checkbox cb-margin">
+                            <input type = "checkbox" name="policy">Policy Two
+                        </label>
+                        <label class="checkbox cb-margin">
+                            <input type = "checkbox" name="policy">Policy Three
+                        </label>
+                    </div>                    
+                    <div class="form-group">
+                        <label for="comment">Comment:</label>
+                        <textarea class="form-control" rows="5" id="comment"></textarea>
+                    </div>
+                    <div class="input-group">
+                        <span class="input-group-addon">Likelihood:</span>
+                        <select class="form-control" name="likelihood" id="likelihood">
+                            <option selected>1 - Extremely likely</option>
+                            <option>2</option>
+                            <option>3</option>
+                            <option>4</option>
+                            <option>5 - Neither likely/unlikely</option>
+                            <option>6</option>
+                            <option>7</option>
+                            <option>8</option>
+                            <option>9 - Extremely likely</option>                            
+                        </select>
+                    </div>                    
+                </div>
+                <div class="modal-footer">
+                    <button id='CancelCreateForm' type="button" class="btn btn-danger" data-dismiss="modal">Cancel</button>
+                    <button id='CreateNodeForm' type="button" class="btn btn-success" data-dismiss="modal">Create Consequence</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit consequence modal dialog -->
+    <div id="editModal" class="modal fade" role="dialog">
+        <div class="modal-dialog">
+            <!-- Modal content-->
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">Edit Consequence</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group form-group-con-type-disable">
+                        <label for="renamedEffectName">Consequence name</label>
+                        <input type="text" class="form-control" id="renamedEffectName" placeholder="Consequence">
+                        <div class="consequence-types">
+                            Consequence Type:
+                            <label class="radio-inline">
+                                <input type = "radio" name="con-type" value = 'positive'>Positive
+                            </label>
+                            <label class="radio-inline">
+                                <input type = "radio" name="con-type" value = 'neutral'>Neutral
+                            </label>
+                            <label class="radio-inline">
+                                <input type = "radio" name="con-type" value = 'negative'>Negative
+                            </label>
+                        </div>
+                    </div>
+                    <div class="policies">
+                        Tag Policy:
+                        <label class="checkbox cb-margin">
+                            <input type = "checkbox" name="policy">Policy One
+                        </label>
+                        <label class="checkbox cb-margin">
+                            <input type = "checkbox" name="policy">Policy Two
+                        </label>
+                        <label class="checkbox cb-margin">
+                            <input type = "checkbox" name="policy">Policy Three
+                        </label>
+                    </div>                    
+                    <div class="form-group">
+                        <label for="comment">Comment:</label>
+                        <textarea class="form-control" rows="5" id="comment"></textarea>
+                    </div>
+                    <div class="input-group">
+                        <span class="input-group-addon">Likelihood:</span>
+                        <select class="form-control" name="likelihood" id="likelihood">
+                            <option selected>1 - Extremely likely</option>
+                            <option>2</option>
+                            <option>3</option>
+                            <option>4</option>
+                            <option>5 - Neither likely/unlikely</option>
+                            <option>6</option>
+                            <option>7</option>
+                            <option>8</option>
+                            <option>9 - Extremely likely</option>                            
+                        </select>
+                    </div>                
+                </div>
+                <div class="modal-footer">
+                    <button id='CancelCreateForm' type="button" class="btn btn-danger" data-dismiss="modal">Cancel</button>
+                    <button id='EditConsequenceForm' type="button" class="btn btn-success" data-dismiss="modal">Edit Consequence</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="tree-container" class="container">
+        <div class="row main-container">
+            <div class='col-md-2 left-panel no-float'>
+                <div class="row welcome-section">
+                    <div class="col-xs-12">
+                        Hello
+                            <%= user.name %>
+                        !!!                        
+                    </div>                    
+                </div>                
+                
+                <div class="trend row">
+                    <div class="form-group">
+                        <label for="mainEventInput">Event, Change or Trend</label>
+                        <input type="text" class="form-control" id="mainEventInput" placeholder="Event or Change">
+                    </div>
+                    <div class="form-group">
+                        <div class="row">
+                            <input type="button" name="create-button" id="create-button" tabindex="4" class="btn create-button" value="Create Event">
+                            <input type="button" name="search-policy-button" id="search-policy-button" tabindex="4" class="btn create-button disabled" value="Search Policies"> 
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="row">
+                             
+                        </div>
+                    </div>                                        
+                </div>
+                <div class="row" >
+                    <div class="list-group">
+                        <a href="#" class="list-group-item">
+                            <span class="glyphicon glyphicon-saved glyphicon-margin"></span>View Saved items</a>
+                        <a href="#" class="list-group-item">
+                            <span class="glyphicon glyphicon-save glyphicon-margin"></span>Save Project</a>
+                        <a href="#" class="list-group-item">
+                            <span class="glyphicon glyphicon-share glyphicon-margin"></span>Share Project</a>
+                        <a href="#" class="list-group-item">
+                            <span class="glyphicon glyphicon-export glyphicon-margin"></span>Export Project</a>
+                        <a href="#" class="list-group-item">
+                            <span class="glyphicon glyphicon-list-alt glyphicon-margin"></span>View Policies</a>
+                    </div>
+                </div>
+                <div class="row" >
+                    <div class="list-group">
+                        <a href="#" class="list-group-item">
+                            <span class="glyphicon glyphicon-cog glyphicon-margin"></span>Manage app settings</a>
+                        <a href="#" class="list-group-item">
+                            <span class="glyphicon glyphicon-user glyphicon-margin"></span>Manage account Information</a>
+                        <a href="#" class="list-group-item">
+                            <span class="glyphicon glyphicon-question-sign glyphicon-margin"></span>View FAQ/Help Page</a>
+                        <a href="#" class="list-group-item">
+                            <span class="glyphicon glyphicon-log-out glyphicon-margin"></span>Logout</a>
+                    </div>
+                </div>
+                <footer class="copyright">
+                    <div>&copy; 2017 &nbsp;<a href="https://ncsu-las.org">Laboratory for Analytic Sciences</a>.</div>
+                    <div>All Rights Reserved</div>
+                </footer>                               
+            </div>
+            <div class='col-md-10 right-panel no-float'>&nbsp;</div>
+        </div>
+    </div>
+    <script src="/js/futures-wheel.js"></script>   
+</body>
+</html>

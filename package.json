@@ -1,0 +1,33 @@
+{
+  "name": "AnticipatoryThinking",
+  "version": "1.0.0",
+  "description": "Anticipatory Thinking Tool for Smart City Planning",
+  "main": "index.js",
+  "scripts": {
+	"start": "node index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "\"Anticipatory",
+    "Thinking\"",
+    "\"Future",
+    "Wheels\"",
+    "\"Smart",
+    "City",
+    "Planning\""
+  ],
+  "dependencies": {
+    "bcrypt-nodejs": "0.0.3",
+    "body-parser": "^1.17.2",
+    "connect-flash": "^0.1.1",
+    "cookie-parser": "^1.4.3",
+    "ejs": "^2.5.6",
+    "express": "^4.15.3",
+    "express-session": "^1.15.3",
+    "express-validator": "^3.2.0",
+    "method-override": "^2.3.9",
+    "mysql": "^2.13.0",
+    "passport": "^0.3.2",
+    "passport-local": "^1.0.0"
+  }
+}
