@@ -18,14 +18,3 @@ $("#create-button").on('click', function () {
     draw_tree({}, tree_root);
     $('#search-policy-button').removeClass('disabled');
 });
-
-var dst = {
-    fall: {
-        from: new Date(),
-        to: new Date()
-    },
-    spring: {
-        from: new Date(),
-        to: new Date()
-    }
-};
