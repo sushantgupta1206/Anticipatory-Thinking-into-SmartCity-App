@@ -189,12 +189,11 @@ html, body, .container{
 	background-color: #1CA347;
 	border-color: #1CA347;
 }
-.forgot-password {
+.forgot-password, .resend-email {
 	text-decoration: underline;
 	color: #888;
 }
-.forgot-password:hover,
-.forgot-password:focus {
+.forgot-password:hover, .resend-email:hover, .forgot-password:focus, .resend-email:focus {
 	text-decoration: underline;
 	color: #666;
 }
