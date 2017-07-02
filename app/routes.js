@@ -9,6 +9,7 @@ var connection = mysql.createConnection(dbconfig.connection);
 connection.query('USE ' + dbconfig.database);
 var bcrypt = require('bcrypt-nodejs');
 var nodemailer = require('nodemailer');
+var moment = require('moment');
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({
@@ -73,24 +74,92 @@ module.exports = function(app, passport) {
         var token = req.query.token;
         console.log('Username: ' + username);
         console.log('Token: ' + token);
-        var cipher = bcrypt.hashSync(username, null, null);
-        console.log('Cipher: ' + cipher);
         console.log('Status - ' + bcrypt.compareSync(username, token));
-        if(bcrypt.compareSync(username, token)){
-            console.log('Tokens matched during account verification');
-            var update_query = "update fw.users set verified_ind = 1 where username = '" + username + "';";
-            console.log("Update Query - " + update_query);
-            connection.query(update_query, function(err, result) {
-                if(err){
-                    console.log("Error occurred");
-                }else{
-                    if(result.affectedRows > 0){
-                        console.log("Verification done!!!");
-                        res.redirect('/verified');
-                    }                        
+        var get_query = "select * from fw.user_verification where username = '" + username + "';";
+        connection.query(get_query, function(error, result){
+            if(error){
+                console.log('Internal server error - ' + error)
+                res.send('Internal server error');
+            }else{
+                if(token != result[0].token){
+                    console.log('Tokens do not match');
+                    res.send('Token for verification is invalid');                 
+                }else{              
+                    var SECS_IN_DAY = 24*60*60*1000;//Change this value for testing
+                    var date = new Date();
+                    console.log(date);
+                    var created_date = new Date(result[0].created_dttm + "Z");
+                    console.log(created_date.getTime());
+                    console.log('Difference - ' + (date.getTime() - created_date.getTime()));
+                    var time_diff = (date.getTime() - created_date.getTime());
+                    if(time_diff <= SECS_IN_DAY){
+                        var update_query = "update fw.users set verified_ind = 1 where username = '" + username + "';";
+                        console.log("Update Query - " + update_query);
+                        connection.query(update_query, function(err, result) {
+                            if(err){
+                                console.log("Error updating database - " + err);
+                            }else{
+                                if(result.affectedRows > 0){
+                                    console.log("Account verified!!!");
+                                    res.redirect('/verified');
+                                }                        
+                            }
+                        });
+                    }else{
+                        console.log('Link has expired. Go to login page to resend account verification link.');
+                        res.send("Link has expired. Go to <a href='/login'>login page</a> to resend account verification link.");
+                    }                    
                 }
-            });
-        }
+            }
+        });        
+    });
+
+    app.post('/resend', function(req, res){
+        var resend_email = req.body.resend_email;
+        console.log('Request to resend account verification email to ' + resend_email);
+        //Verify if it is a valid email.
+        connection.query("select * from users where email = ?", [resend_email], function(err, rows){
+            if(err) {
+                //If there is any error, then print in console
+                console.log('Error while checking if email address is valid.' + err);
+            } else if(!rows.length) {
+                //If no rows were retrieved, then the email address does not exist in records
+                res.render('resend.ejs', {resendMsg: 'No such email address found.'});
+            } else {
+                //If select is successful, then first send the email and update the user_verification table with new information.
+                var transporter = nodemailer.createTransport({
+                    service: 'gmail',
+                    auth: {
+                        user: 'scat.noreply@gmail.com',
+                        pass: 'noreplyscat1#'
+                    }
+                });
+                var username = rows[0].username;
+                var token = bcrypt.hashSync(username, null, null);
+                var link = "http://" + req.get('host') + "/verify?username=" + username + "&token=" + token;
+                console.log("Verification URL - " + link);
+
+                transporter.sendMail({
+                    from: 'scat.noreply@gmail.com',
+                    to: resend_email,
+                    subject: 'Verify Account',
+                    text: 'Please verify your account by clicking on the link (' + link + ') to login and use the application. This link is valid only for 24 hours'
+                });
+                console.log('Verification mail sent');  
+                //Once mail is sent, update the database with new values.
+                var update_verif_query = 'update user_verification set token = ?, created_dttm = ? where username = ?';
+                var sql_date = moment.utc().format('YYYY-MM-DD HH:mm:ss');
+                connection.query(update_verif_query, [token, sql_date, username], function(error, result){
+                    if(error){
+                        console.log('Internal server error - ' + error);
+                    } else{
+                        console.log(result.affectedRows + " record(s) updated");
+                        console.log('Successfully updated database with new values');
+                        res.render('resend.ejs', {resendMsg: 'Resent verification email. Please verify within 24 hours.'});
+                    }
+                });                       
+            }    
+        });
     });
 
     app.get('/forgot', function(req, res){
@@ -165,41 +234,7 @@ module.exports = function(app, passport) {
                 }
             });
         }
-    });
-
-    app.post('/resend', function(req, res){
-        var resend_email = req.body.resend_email;
-        console.log('Request to resend account verification email to ' + resend_email);
-        //Verify if it is a valid email.
-        connection.query("select * from users where email = ?", [resend_email], function(err, rows){
-            if(err) {
-                console.log('Error while checking if email address is valid.');
-            } else if(!rows.length) {
-                res.render('resend.ejs', {resendMsg: 'No such email address found.'});
-            } else {
-                var transporter = nodemailer.createTransport({
-                    service: 'gmail',
-                    auth: {
-                        user: 'scat.noreply@gmail.com',
-                        pass: 'noreplyscat1#'
-                    }
-                });
-
-                var link = "http://" + req.get('host') + "/verify?username=" + rows[0].username + "&token=" + bcrypt.hashSync(rows[0].username, null, null);
-                console.log("Verification URL - " + link);
-
-                transporter.sendMail({
-                    from: 'scat.noreply@gmail.com',
-                    to: resend_email,
-                    subject: 'Verify Account',
-                    text: 'Please verify your account by clicking on the link (' + link + ') to login and use the application. This link is valid only for 24 hours'
-                });
-                console.log('Verification mail sent');            
-                res.render('resend.ejs', {resendMsg: 'Resent verification email. Please verify within 24 hours.'});
-                console.log('Check if control comes here or is pre-empted');
-            }    
-        });
-    });
+    });    
 
     app.use(function (err, req, res, next) {
         console.error(err.stack);

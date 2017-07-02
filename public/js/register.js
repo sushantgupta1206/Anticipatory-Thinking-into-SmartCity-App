@@ -43,18 +43,18 @@ $(document).ready(function(){
         }
 
         var fullname = $("#fullname").val();
-        var name_regex = new RegExp("[a-zA-Z ]{4,30}");
+        var name_regex = /^[a-zA-Z ]{4,30}$/;
         isValidInput = name_regex.test(fullname);
         if(!isValidInput){
             console.log('Invalid full name');
-            $('.auth-error-message').html(generateAlertMessage("Invalid full name. Only alphabets allowed along with space and following special characters (,.'-)"));
+            $('.auth-error-message').html(generateAlertMessage("Invalid Full Name format. Only alphabets allowed along with space"));
             $('#fullname').focus();
             return false;
         }
 
         var question = $("#security-question").val();
         var answer = $("#sec-answer").val();
-        var answer_regex = new RegExp("[A-Za-z0-9]{1,16}");
+        var answer_regex = /^[A-Za-z0-9]{1,16}$/;
         isValidInput = answer_regex.test(answer);
         if(!isValidInput){
             console.log('Invalid answer');

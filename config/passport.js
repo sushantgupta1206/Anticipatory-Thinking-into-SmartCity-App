@@ -3,6 +3,7 @@ var mysql = require('mysql');
 var bcrypt = require('bcrypt-nodejs');
 var dbconfig = require('./database');
 var connection = mysql.createConnection(dbconfig.connection);
+var moment = require('moment');
 
 var nodemailer = require('nodemailer');
 
@@ -10,13 +11,11 @@ connection.query('USE ' + dbconfig.database);
 
 module.exports = function(passport) {
     passport.serializeUser(function(user, done){
-        //console.log('Serializing User');
         done(null, user.id);
     });
 
     passport.deserializeUser(function(id, done) {
         connection.query("SELECT * FROM users WHERE id = ? ",[id], function(err, rows){
-            //console.log('De-Serializing User: ' + rows[0]);
             done(err, rows[0]);
         });
     });
@@ -28,19 +27,22 @@ module.exports = function(passport) {
             passReqToCallback : true
         }, 
         function(req, username, password, done){
-            //console.log(req);
+            //Check if username is available
             connection.query("select * from users where username = ?",[username], function(err, rows) {
                 if (err)
-                    return done(err);
+                    return done(err);//If error is encountered, send it to callback.
                 if (rows.length) {
+                    //If row with username already exists, then send error message
                     return done(null, false, req.flash('registerMsg', 'The provided username is not available.'));
                 } else {
+                    //Check the same for email address.
                     connection.query("select * from users where email = ?", [req.body.email], function(err, rows){
                         if(err)
                             return done(err);
                         if(rows.length){
                             return done(null, false, req.flash('registerMsg', 'The provided email address is not available.'));
                         } else {
+                            //If both username and email address are available, then send verification mail
                             var transporter = nodemailer.createTransport({
                                 service: 'gmail',
                                 auth: {
@@ -53,8 +55,8 @@ module.exports = function(passport) {
                                 username: username,
                                 password: bcrypt.hashSync(password, null, null)
                             };
-
-                            var link = "http://" + req.get('host') + "/verify?username=" + username + "&token=" + bcrypt.hashSync(username, null, null);
+                            var token = bcrypt.hashSync(username, null, null);
+                            var link = "http://" + req.get('host') + "/verify?username=" + username + "&token=" + token;
                             console.log("Verification URL - " + link);
 
                             transporter.sendMail({
@@ -63,18 +65,34 @@ module.exports = function(passport) {
                                 subject: 'Verify Account',
                                 text: 'Please verify your account by clicking on the link (' + link + ') to login and use the application'
                             });
-
+                            //Once mail is sent, insert into users table.
                             var insertQuery = "insert into users ( id, name, username, password, email, question, answer, verified_ind) values (?,?,?,?,?,?,?,?);";
 
                             connection.query(insertQuery,[null, req.body.fullname, newUser.username, newUser.password, req.body.email, req.body.question, req.body.answer, false],function(err, result) {
-                                console.log("Insertion successful: ");
+                                if(err){
+                                    console.log('Server Error - ' + err);
+                                    return done(err);
+                                }                                
+                                console.log("Insertion into users table successful: ");
                                 console.log(result);
                                 newUser.id = result.insertId;
                                 console.log(newUser);
-                                return done(null, newUser, req.flash('loginMsg', 'Successfully registered. Please verify your account before logging in!!'));
+                                //After that insert into user verification table
+                                var verif_query = 'insert into user_verification (username , token, created_dttm) values(?, ?, ?);';
+                                var sql_date = moment.utc().format('YYYY-MM-DD HH:mm:ss');
+                                console.log('SQL Date -' + sql_date);
+                                connection.query(verif_query, [newUser.username, token, sql_date], function(error, result){
+                                    if(error){
+                                        console.log('Internal server error - ' + error);
+                                        return done(err);
+                                    } else{
+                                        console.log('Successfully inserted into database');
+                                        return done(null, newUser, req.flash('loginMsg', 'Successfully registered. Please verify your account before logging in!!'));
+                                    }
+                                });                                
                             });
                         }
-                    })                    
+                    });                  
                 }
             });
         })
