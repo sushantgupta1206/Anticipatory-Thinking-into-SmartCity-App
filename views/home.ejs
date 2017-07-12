@@ -14,13 +14,13 @@
     <link rel="stylesheet" href="/css/styles.css">
     <link rel="stylesheet" href="css/d3-context-menu.css" />
     
-    <script src="/js/d3.min.js"></script>
-    <script src="/js/dndTree.js"></script>
+    <script src="https://d3js.org/d3.v3.js"></script>    
     <script src="/js/d3-context-menu.js"></script>
     <script src="/js/underscore-min.js"></script>
     <script src="/js/jquery.js"></script>
     <script src="/js/fastclick.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>    
+    <script src="/js/radial.js"></script>
 </head>
 <body>
     <!-- Create new Modal -->
@@ -166,7 +166,7 @@
                     <div class="form-group">
                         <label for="mainEventInput">Event, Change or Trend</label>
                         <input type="text" class="form-control event-margin" id="mainEventInput" placeholder="Event or Change">
-                        <input type="button" name="create-button" id="create-button" class="btn create-button" value="Create Event">
+                        <input type="button" data-role='create-event' name="create-button" id="create-button" class="btn create-button" value="Create Event">
                         <input type="button" name="search-policy-button" id="search-policy-button" class="btn create-button disabled" value="Search Policies"> 
                     </div>                                                              
                 </div>

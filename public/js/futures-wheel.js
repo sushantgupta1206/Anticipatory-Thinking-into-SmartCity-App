@@ -11,10 +11,19 @@ $("#EditConsequenceForm").on('click', function () {
 });
 
 $("#create-button").on('click', function () {
-    tree_root = {
-        "name": $('#mainEventInput').val(),
-        "children": []
-    };
-    draw_tree({}, tree_root);
+    var role = $(this).data('role');
+    if(role === 'create-event'){
+        tree_root = {
+            "name": $('#mainEventInput').val(),
+            "children": []
+        };
+        draw_tree(tree_root);
+        $(this).attr('data-role', 'search-consequence');
+        $(this).html('Search Consequences');
+        console.log('Done!');
+    }else{
+        alert($this.text());
+        console.log('TODO');
+    }    
     $('#search-policy-button').removeClass('disabled');
 });
