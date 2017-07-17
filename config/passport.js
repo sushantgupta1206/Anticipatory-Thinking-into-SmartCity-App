@@ -98,30 +98,48 @@ module.exports = function(passport) {
         })
     );
 
-    passport.use('local-login', 
+  passport.use('local-login', 
         new LocalStrategy({
             usernameField : 'username',
             passwordField : 'password',
             passReqToCallback : true
         }, 
         function(req, username, password, done){
-            connection.query("select * from users where username = ?",[username], function(err, rows){
+
+connection.query("select * from users where username = ?",[username], function(err, rows){
                 if (err)
                     return done(err);
                 if (!rows.length) {
                     return done(null, false, req.flash('loginMsg', 'No such user found.'));
                 }
-
-                if (!bcrypt.compareSync(password, rows[0].password)){
-                    return done(null, false, req.flash('loginMsg', 'Username and password combination is wrong.'));
-                }
-
-                if(rows[0].verified_ind === 0){
-                    return done(null, false, req.flash('loginMsg', 'You account has not been verified yet.'));
-                }
-
-                return done(null, rows[0]);
+                
+                if (!bcrypt.compareSync(password, rows[0].password)) {
+                    console.log('BCrypt section');
+                    connection.query("select * from users where username = ?", [username], function (err, rows) {
+                        if (err) 
+                            return done(err);
+                        if (rows[0].attempts == 0)
+                            return done(null, false, req.flash('loginMsg', 'Please reset your password as max attempts are completed.'));
+                        var attempts = rows[0].attempts;
+                        var sql_query = "UPDATE users SET attempts = " + --attempts + " WHERE username = '" + username + "';";
+                        console.log(sql_query);
+                        connection.query(sql_query, function (err, rows) {
+                            if (err)
+                                return done(err);
+                            console.log('Updating the number of attempts ' + attempts);
+                            //var msg = (attempts + ' attempts are left to login. Username and password combination is wrong.');
+                            return done(null, false, req.flash('loginMsg', 'failed'));
+                        });
+                    }); 
+                }else{
+                    if(rows[0].verified_ind === 0){
+                        return done(null, false, req.flash('loginMsg', 'You account has not been verified yet.'));
+                    }
+                    console.log('Success!');
+                    return done(null, rows[0]);
+                }                
             });
-        })
-    );
+		}
+		)
+		);
 };
