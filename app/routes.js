@@ -194,25 +194,34 @@ module.exports = function(app, passport) {
     app.get('/reset', function(req, res){
         var email = req.query.email;
         var token = req.query.token;
-        console.log('Handling reset request');
+        console.log("Hi");
+		console.log('Handling reset request');
         console.log('email - ' + email);
         console.log('token - ' + token);
-        //TODO - Handle invalid URL params
-        if(!email || !token){
+        console.log("HI");
+		//TODO - Handle invalid URL params
+        console.log(!email || !token);
+		if(!email || !token){
             return res.redirect('/forgot');
         }
-        if(bcrypt.compareSync(email, token)){
-            res.render('reset.ejs');
+        console.log(bcrypt.compareSync(email, token));
+		if(bcrypt.compareSync(email, token)){
+            var reset_msg={};
+			reset_msg.email=email;
+			reset_msg.token=token;
+			console.log(reset_msg);
+        
+			res.render('reset.ejs',{reset_msg: reset_msg});
         }
     });
 
     app.post('/reset', function(req, res){        
         console.log('Handling post request for password reset');
-        var email = req.query.email;
-        var token = req.query.token;
-        console.log('Email - ' + email);
-        console.log('Token - ' + token);
-        var pwd = req.body.reset_pwd;
+        //var email = req.body.email;
+		console.log(req.body);
+		var email = req.body.email;
+		var token = req.body.token;
+		var pwd = req.body.reset_pwd;
         var conf_pwd = req.body.reset_pwd_cnf;
         
         //TODO - validate post params
