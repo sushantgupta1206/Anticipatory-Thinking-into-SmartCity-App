@@ -98,7 +98,7 @@ module.exports = function(passport) {
         })
     );
 
-  passport.use('local-login', 
+ passport.use('local-login', 
         new LocalStrategy({
             usernameField : 'username',
             passwordField : 'password',
@@ -135,8 +135,14 @@ connection.query("select * from users where username = ?",[username], function(e
                     if(rows[0].verified_ind === 0){
                         return done(null, false, req.flash('loginMsg', 'You account has not been verified yet.'));
                     }
-                    console.log('Success!');
-                    return done(null, rows[0]);
+                    var update_query = "UPDATE users SET attempts = 3 WHERE username = '" + username + "';";
+                    console.log(update_query);
+                    connection.query(update_query, function (err, rows) {
+                        if (err)
+                            return done(err);
+						console.log('Success!');
+						return done(null, rows[0]);
+					});
                 }                
             });
 		}
