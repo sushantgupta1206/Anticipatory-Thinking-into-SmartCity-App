@@ -93,6 +93,46 @@ $(document).ready(function(){
 
         return true;
     });
+
+	$('#reset-pwd-form').submit(function(){
+        var isValidInput = true;
+
+        var password = $("#reset_pwd").val();
+        var confirmpwd = $("#reset_pwd_cnf").val();
+        var password_regex = new RegExp("^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\$%\^&\*])(?=.{8,20})");
+        if(password !== confirmpwd){
+            console.log("Passwords do not match");
+            $('.auth-error-message').html(generateAlertMessage('Both passwords do not match'));
+            //alert('Passwords do not match');
+            $('#reset_pwd').focus();
+            return false;
+        }
+
+        isValidInput = password_regex.test(password);
+        if(!isValidInput){
+            console.log('Password does not match expected pattern');
+            $('.auth-error-message').html(generateAlertMessage('Password does not match expected pattern. Should contain atleast 1 number, 1 upper case letter, 1 lower case letter and 1 special character (!@#$%^&*). Maximum allowed length is 8-20 characters.'));
+            //alert('Password does not match expected pattern');
+            $('#reset_pwd').focus();
+            return false;
+        }
+
+        isValidInput = password_regex.test(confirmpwd);
+        if(!isValidInput){
+            console.log('Confirm Password does not match expected pattern');
+            $('.auth-error-message').html(generateAlertMessage('Confirm Password does not match expected pattern. Should contain atleast 1 number, 1 upper case letter, 1 lower case letter and 1 special character (!@#$%^&*). Maximum allowed length is 8-20 characters.'));
+            //alert('Confirm Password does not match expected pattern');
+            $("#reset_pwd_cnf").focus();
+            return false;
+        }
+
+        console.log("Validated!!");
+        
+        return isValidInput;
+    });
+	
+	
+	
 });
 
 function generateAlertMessage(msg){

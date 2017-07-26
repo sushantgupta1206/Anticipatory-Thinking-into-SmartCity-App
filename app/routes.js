@@ -194,11 +194,11 @@ module.exports = function(app, passport) {
     app.get('/reset', function(req, res){
         var email = req.query.email;
         var token = req.query.token;
-        console.log("Hi");
+        //console.log("Hi");
 		console.log('Handling reset request');
         console.log('email - ' + email);
         console.log('token - ' + token);
-        console.log("HI");
+        //console.log("HI");
 		//TODO - Handle invalid URL params
         console.log(!email || !token);
 		if(!email || !token){
@@ -231,7 +231,7 @@ module.exports = function(app, passport) {
         if(bcrypt.compareSync(email, token)){
             console.log('Tokens are good');
             var update_query = "update fw.users set password = '" + bcrypt.hashSync(pwd, null, null) + "' where email = '" + email + "';";
-            console.log(update_query);
+            //console.log(update_query);
             connection.query(update_query, function(err, result){
                 if(err){
                     console.log("Error updating password");
