@@ -1,38 +1,115 @@
 CREATE DATABASE  IF NOT EXISTS `fw` /*!40100 DEFAULT CHARACTER SET utf8 */;
 USE `fw`;
--- phpMyAdmin SQL Dump
--- version 4.6.5.2
--- https://www.phpmyadmin.net/
+-- MySQL dump 10.13  Distrib 5.7.17, for Win64 (x86_64)
 --
--- Host: 127.0.0.1
--- Generation Time: Jul 17, 2017 at 05:03 PM
--- Server version: 10.1.21-MariaDB
--- PHP Version: 5.6.30
-
-SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
-SET time_zone = "+00:00";
-
+-- Host: localhost    Database: fw
+-- ------------------------------------------------------
+-- Server version	5.7.18-log
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
 /*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
-/*!40101 SET NAMES utf8mb4 */;
+/*!40101 SET NAMES utf8 */;
+/*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
+/*!40103 SET TIME_ZONE='+00:00' */;
+/*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
+/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
+/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
+/*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
--- Database: `fw`
+-- Table structure for table `consequences`
 --
 
--- --------------------------------------------------------
+DROP TABLE IF EXISTS `consequences`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `consequences` (
+  `cid` int(11) NOT NULL AUTO_INCREMENT,
+  `cname` varchar(30) NOT NULL,
+  `cnodeid` int(11) DEFAULT NULL,
+  `cparentnodeid` int(11) DEFAULT NULL,
+  `likelihood` int(11) DEFAULT NULL,
+  `impact` varchar(10) DEFAULT NULL,
+  `importance` varchar(8) DEFAULT NULL,
+  `notes` varchar(250) DEFAULT NULL,
+  `pid` int(11) DEFAULT NULL,
+  PRIMARY KEY (`cid`),
+  KEY `fk_projectid` (`pid`),
+  CONSTRAINT `fk_projectid` FOREIGN KEY (`pid`) REFERENCES `projects` (`pid`) ON DELETE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=18 DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `consequences`
+--
+
+LOCK TABLES `consequences` WRITE;
+/*!40000 ALTER TABLE `consequences` DISABLE KEYS */;
+/*!40000 ALTER TABLE `consequences` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `projects`
+--
+
+DROP TABLE IF EXISTS `projects`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `projects` (
+  `pid` int(11) NOT NULL AUTO_INCREMENT,
+  `pname` varchar(50) NOT NULL,
+  `powner` varchar(20) DEFAULT NULL,
+  `created_dttm` datetime DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`pid`),
+  KEY `fk_username` (`powner`),
+  CONSTRAINT `fk_username` FOREIGN KEY (`powner`) REFERENCES `users` (`username`) ON DELETE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `projects`
+--
+
+LOCK TABLES `projects` WRITE;
+/*!40000 ALTER TABLE `projects` DISABLE KEYS */;
+/*!40000 ALTER TABLE `projects` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `user_verification`
+--
+
+DROP TABLE IF EXISTS `user_verification`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `user_verification` (
+  `username` varchar(30) NOT NULL,
+  `token` varchar(150) DEFAULT NULL,
+  `created_dttm` datetime DEFAULT NULL,
+  KEY `username` (`username`),
+  CONSTRAINT `user_verification_ibfk_1` FOREIGN KEY (`username`) REFERENCES `users` (`username`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `user_verification`
+--
+
+LOCK TABLES `user_verification` WRITE;
+/*!40000 ALTER TABLE `user_verification` DISABLE KEYS */;
+/*!40000 ALTER TABLE `user_verification` ENABLE KEYS */;
+UNLOCK TABLES;
 
 --
 -- Table structure for table `users`
 --
+
 DROP TABLE IF EXISTS `users`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
-
 CREATE TABLE `users` (
-  `id` int(11) NOT NULL,
+  `id` int(11) NOT NULL AUTO_INCREMENT,
   `name` varchar(30) DEFAULT NULL,
   `username` varchar(20) DEFAULT NULL,
   `password` varchar(100) DEFAULT NULL,
@@ -40,79 +117,37 @@ CREATE TABLE `users` (
   `question` varchar(100) DEFAULT NULL,
   `answer` varchar(20) DEFAULT NULL,
   `verified_ind` tinyint(1) DEFAULT NULL,
-  `attempts` int(11) NOT NULL DEFAULT '3'
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+  `attempts` int(11) DEFAULT '3',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `username` (`username`),
+  UNIQUE KEY `email` (`email`)
+) ENGINE=InnoDB AUTO_INCREMENT=32 DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Dumping data for table `users`
 --
+
 LOCK TABLES `users` WRITE;
-
-INSERT INTO `users` (`id`, `name`, `username`, `password`, `email`, `question`, `answer`, `verified_ind`, `attempts`) VALUES
-(31, 'J Jeris Alan', '001980351', '$2a$10$gPuugy7Mm9cJmIIvPOTrp..PBMIArma2j3EIbpCfNoNUTyRdSi/gu', 'alan.jeris@gmail.com', 'What is the name of your first pet?', 'Jerry', 1, 3),
-(32, 'Sushant Gupta', 'sushant1206', '$2a$10$FQSmVxgy7.SR2yco70rc7eIqjCAB36D2MqabkI/nAiO5UVFnzzRMK', 'sagupta@ncsu.edu', 'In which year were you born?', '1993', 1, 3);
-UNLOCK TABLES;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `user_verification`
---
-DROP TABLE IF EXISTS `user_verification`;
-
-CREATE TABLE `user_verification` (
-  `username` varchar(30) NOT NULL,
-  `token` varchar(150) DEFAULT NULL,
-  `created_dttm` datetime DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
---
--- Dumping data for table `user_verification`
---
-LOCK TABLES `user_verification` WRITE;
-
-INSERT INTO `user_verification` (`username`, `token`, `created_dttm`) VALUES
-('001980351', '$2a$10$0GtPfasKEDuBY/SqIlm5...Hk2nFR1HWFQxa1xyTVp81X7F3k4pCS', '2017-07-02 01:27:32'),
-('sushant1206', '$2a$10$PxGwrad5rvm5rEP1mhKW/.8nlr3AbVdcPD5gOgKcPJRiJ/IxqrxBi', '2017-07-17 01:38:18');
+/*!40000 ALTER TABLE `users` DISABLE KEYS */;
+/*!40000 ALTER TABLE `users` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
--- Indexes for dumped tables
+-- Dumping events for database 'fw'
 --
 
 --
--- Indexes for table `users`
+-- Dumping routines for database 'fw'
 --
-ALTER TABLE `users`
-  ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `username` (`username`),
-  ADD UNIQUE KEY `email` (`email`);
+/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
---
--- Indexes for table `user_verification`
---
-ALTER TABLE `user_verification`
-  ADD KEY `username` (`username`);
-
---
--- AUTO_INCREMENT for dumped tables
---
-
---
--- AUTO_INCREMENT for table `users`
---
-ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=33;
---
--- Constraints for dumped tables
---
-
---
--- Constraints for table `user_verification`
---
-ALTER TABLE `user_verification`
-  ADD CONSTRAINT `user_verification_ibfk_1` FOREIGN KEY (`username`) REFERENCES `users` (`username`) ON DELETE CASCADE ON UPDATE CASCADE;
-
+/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
+/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
+/*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
+
+-- Dump completed on 2017-08-02  3:02:53
