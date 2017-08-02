@@ -247,7 +247,158 @@ module.exports = function(app, passport) {
 
     app.use(function (err, req, res, next) {
         console.error(err.stack);
-        res.status(500).send('Internal server error!');
+        var status = err.status || 500;
+        res.status(status).send('Internal server error!');
+    });
+
+    //Check if project name is available
+    app.post('/check_project_name', function(req, res){
+        var data = req.body;
+        console.log(data.pname);
+        console.log(req.user.username);
+        var query = "select * from projects where pname = ? and powner = ?";
+        connection.query(query, [data.pname, req.user.username], function(error, rows){
+            if(error){
+                console.error('Error fetching projects');
+                throw error;
+            }else if(rows.length){
+                console.log('Project already exists');
+                var response = {
+                    isAvailable: false,
+                    status: 200                    
+                }
+                res.end(JSON.stringify(response));
+            }else{
+                console.log('Project not found');
+                var response = {
+                    isAvailable: true,
+                    status: 200
+                }
+                res.end(JSON.stringify(response));
+            }
+        });
+    });
+
+    //Save futures wheel to database
+    app.post('/save_project', function(req, res){
+        console.log('POST data');
+        var data = req.body;
+        console.log(data);
+        /**
+         * JSON data received from AJAX call
+         * {
+         *      data: {
+         *          pname: '',
+         *          fw: []
+         *      }
+         * }
+         */
+        var pname = data.pname;
+        var consequences = data.fw;
+        var sql_date = moment.utc().format('YYYY-MM-DD HH:mm:ss');
+        console.log(req.user);        
+        
+        var query = "select * from projects where pname = ? and powner = ?";
+        connection.query(query, [data.pname, req.user.username], function(error, rows){
+            if(error){
+                console.error('Error selecting projects');
+                throw error;
+            }else if(rows.length){
+                console.log('Project already exists');
+                var rowID = rows[0].pid;
+                var values = [];
+                for(var i = 0; i < consequences.length; i++){
+                    var c = consequences[i];
+                    var item = [null, c.name, c.id, c.parentid, c.likelihood, c.impact, c.importance, c.comments, rowID];
+                    values.push(item);
+                }
+                console.log(values);
+                console.log('Figured out entries to be inserted into db');
+                //Delete all the existing entries in consequences table and then insert the new ones.
+                var delete_query = "delete from consequences where pid = " + rowID;
+                connection.query(delete_query, function(error, result){
+                    if(error){
+                        console.error('Error deleting entries in consequences table');
+                        throw error;
+                    }
+                    var insert_conseq_query = "insert into consequences (cid, cname, cnodeid, cparentnodeid, likelihood, impact, importance, notes, pid) values ?;";
+                    connection.query(insert_conseq_query, [values], function(err, result){
+                        if(err){
+                            console.error('Error inserting into consequences table - ' + err);
+                            throw err;
+                        }
+                        console.log('No of affected rows - ' + result.affectedRows);
+                        var response = {
+                            pid: rowID,
+                            status: 200,
+                            success: 'Inserted futures wheel into the DB'
+                        }
+                        res.end(JSON.stringify(response));
+                    });                    
+                });                
+            }else{
+                console.log('Project not found');
+                var project_insert_query = "insert into projects (pid, pname, powner, created_dttm) values (?, ?, ?, ?);"
+                connection.query(project_insert_query, [null, pname, req.user.username, sql_date], function(err, result){
+                    if(err){
+                        console.error("Error inserting into projects table - " + err);
+                        throw err; 
+                    }
+                    var rowID = result.insertId;
+                    console.log("Insert ID - " + rowID);
+                    var values = [];
+                    for(var i = 0; i < consequences.length; i++){
+                        var c = consequences[i];
+                        var item = [null, c.name, c.id, c.parentid, c.likelihood, c.impact, c.importance, c.comments, rowID];
+                        values.push(item);
+                    }
+                    console.log(values);
+                    console.log('Figured out entries to be inserted into db');
+                    var insert_conseq_query = "insert into consequences (cid, cname, cnodeid, cparentnodeid, likelihood, impact, importance, notes, pid) values ?;";
+                    connection.query(insert_conseq_query, [values], function(err, result){
+                        if(err){
+                            console.error('Error inserting into consequences table - ' + err);
+                            throw err;
+                        }
+                        console.log('No of affected rows - ' + result.affectedRows);
+                        var response = {
+                            pid: rowID,
+                            status: 200,
+                            success: 'Inserted futures wheel into the DB'
+                        }
+                        res.end(JSON.stringify(response));
+                    });                    
+                });
+            }
+        });            
+    });
+
+    app.post('/view_items', function(req, res){
+        if(req.user && req.user.username){
+            console.log(req.user.username + " made request for viewing all projects");
+            connection.query("select p.pid, p.pname, u.name, p.created_dttm from users u, projects p where u.username='" + req.user.username + "' and p.powner = u.username;", function(error, result){
+                if(error){
+                    console.log(error);
+                    throw error;
+                }else if(!result.length){
+                    var response = {
+                        resultLength: 0,
+                        status: 200
+                    };
+                    res.end(JSON.stringify(response));
+                }else{
+                    var response = {
+                        resultLength: result.length,
+                        result: result,
+                        status: 200
+                    };
+                    res.end(JSON.stringify(response));
+                }
+            });
+        }else{
+            console.log('Error with username or request object');
+            res.status(400).send("HTTP Error 400 - Bad request");
+        }      
     });
 };
 

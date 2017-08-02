@@ -19,12 +19,18 @@ d3.contextMenu = function (menu, openCallback) {
 		var list = d3.selectAll('.d3-context-menu').append('ul');
 		list.selectAll('li').data(menu).enter()
 			.append('li')
+			.attr('class', function(d){
+				if(d.divider)
+					return "is-divider";
+			})
 			.html(function(d) {
+				if(d.divider)
+					return '<hr/>';
 				var str = "<span>";
 				if(d.title === "Create new consequence"){
 					str = "<span data-toggle = 'modal' data-target = '#createNewModal'>";
 				}else if(d.title === "Edit consequence"){
-					str = "<span data-toggle = 'modal' data-target = '#editModal'>";
+					str = "<span class='edit-con-option'>";
 				}				
 				return (typeof d.title === 'string') ? str + d.title + "</span>" : str + d.title(data) + "</span>";
 			})

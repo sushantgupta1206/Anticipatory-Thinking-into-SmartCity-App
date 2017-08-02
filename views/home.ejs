@@ -23,7 +23,34 @@
     <script src="/js/radial.js"></script>
 </head>
 <body>
-    <!-- Create new Modal -->
+    <!-- Create new project -->
+    <div class='modal fade' role='dialog' id='createProjectModal'>
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">Create new Project</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="proj-exists-message"></div>
+                    <div class="form-group">
+                        <label for="project-name">Project Name</label>
+                        <input type="text" name="project-name" class="form-control" id="newProjectName" placeholder="Project Name" required>                        
+                    </div>
+                    <div class="form-group">
+                        <label for="root-node-name">Change, Event or Decision</label>
+                        <input type="text" name="root-node-name" class="form-control" id="rootNodeName" placeholder="Main change, event or decision to be explored" required>                        
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button id='CancelCreateProjectForm' type="button" class="btn btn-danger" data-dismiss="modal">Cancel</button>
+                    <button id='CreateProjectForm' type="button" class="btn btn-success">Create Project</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add new consequence Modal -->
     <div id="createNewModal" class="modal fade" role="dialog">
         <div class="modal-dialog">
             <!-- Modal content-->
@@ -34,23 +61,10 @@
                 </div>
                 <div class="modal-body">
                     <div class="form-group form-group-con-type-disable">
-                        <input type="text" class="form-control" id="newEffectName" placeholder="Consequence Name">
-                        <div class="consequence-types">
-                            Consequence Type:
-                            <label class="radio-inline">
-                                <input type = "radio" name="con-type" value = 'positive'>Positive
-                            </label>
-                            <label class="radio-inline">
-                                <input type = "radio" name="con-type" value = 'neutral'>Neutral
-                            </label>
-                            <label class="radio-inline">
-                                <input type = "radio" name="con-type" value = 'negative'>Negative
-                            </label>
-                        </div>
-                    </div>
-                                          
+                        <input type="text" class="form-control" id="newEffectName" placeholder="Consequence Name">                        
+                    </div>                                          
                     <div class="policies">
-                        Tag Policy:
+                        <label>Tag Policies</label>
                         <label class="checkbox cb-margin">
                             <input type = "checkbox" name="policy">Policy One
                         </label>
@@ -62,21 +76,37 @@
                         </label>
                     </div>                    
                     <div class="form-group">
-                        <label for="comment">Comment:</label>
-                        <textarea class="form-control" rows="5" id="comment"></textarea>
+                        <label for="comment">Notes:</label>
+                        <textarea class="form-control" rows="5" id="con-comment"></textarea>
                     </div>
-                    <div class="input-group">
+                    <div class="input-group fw-ig">
+                        <span class="input-group-addon">Impact:</span>
+                        <select class="form-control" name="impact" id="con-impact">
+                            <option value = 'neutral' selected>Neutral</option>
+                            <option value = 'positive'>Positive</option>
+                            <option value = 'negative'>Negative</option>
+                        </select>
+                    </div>
+                    <div class="input-group fw-ig">
+                        <span class="input-group-addon">Importance:</span>
+                        <select class="form-control" name="importance" id="con-importance">
+                            <option value = 'low' selected>Low</option>
+                            <option value = 'medium'>Medium</option>
+                            <option value = 'high'>High</option>
+                        </select>
+                    </div>
+                    <div class="input-group fw-ig">
                         <span class="input-group-addon">Likelihood:</span>
-                        <select class="form-control" name="likelihood" id="likelihood">
-                            <option selected>1 - Extremely likely</option>
-                            <option>2</option>
-                            <option>3</option>
-                            <option>4</option>
-                            <option>5 - Neither likely/unlikely</option>
-                            <option>6</option>
-                            <option>7</option>
-                            <option>8</option>
-                            <option>9 - Extremely likely</option>                            
+                        <select class="form-control" name="likelihood" id="con-likelihood">
+                            <option value = '1' selected>1 - Extremely likely</option>
+                            <option value = '2'>2</option>
+                            <option value = '3'>3</option>
+                            <option value = '4'>4</option>
+                            <option value = '5'>5 - Neither likely/unlikely</option>
+                            <option value = '6'>6</option>
+                            <option value = '7'>7</option>
+                            <option value = '8'>8</option>
+                            <option value = '9'>9 - Extremely unlikely</option>                            
                         </select>
                     </div>                    
                 </div>
@@ -99,23 +129,10 @@
                 </div>
                 <div class="modal-body">
                     <div class="form-group form-group-con-type-disable">
-                        <label for="renamedEffectName">Consequence name</label>
-                        <input type="text" class="form-control" id="renamedEffectName" placeholder="Consequence">
-                        <div class="consequence-types">
-                            Consequence Type:
-                            <label class="radio-inline">
-                                <input type = "radio" name="con-type" value = 'positive'>Positive
-                            </label>
-                            <label class="radio-inline">
-                                <input type = "radio" name="con-type" value = 'neutral'>Neutral
-                            </label>
-                            <label class="radio-inline">
-                                <input type = "radio" name="con-type" value = 'negative'>Negative
-                            </label>
-                        </div>
+                        <input type="text" class="form-control" id="renamedEffectName" placeholder="Consequence">                        
                     </div>
                     <div class="policies">
-                        Tag Policy:
+                        <label>Tag Policies</label>
                         <label class="checkbox cb-margin">
                             <input type = "checkbox" name="policy">Policy One
                         </label>
@@ -127,21 +144,37 @@
                         </label>
                     </div>                    
                     <div class="form-group">
-                        <label for="comment">Comment:</label>
-                        <textarea class="form-control" rows="5" id="comment"></textarea>
+                        <label for="comment">Notes:</label>
+                        <textarea class="form-control" rows="5" id="edit-con-comment"></textarea>
                     </div>
-                    <div class="input-group">
+                    <div class="input-group fw-ig">
+                        <span class="input-group-addon">Impact:</span>
+                        <select class="form-control" name="impact" id="edit-con-impact">
+                            <option value = 'neutral' selected>Neutral</option>
+                            <option value = 'positive'>Positive</option>
+                            <option value = 'negative'>Negative</option>
+                        </select>
+                    </div>
+                    <div class="input-group fw-ig">
+                        <span class="input-group-addon">Importance:</span>
+                        <select class="form-control" name="importance" id="edit-con-importance">
+                            <option value = 'low' selected>Low</option>
+                            <option value = 'medium'>Medium</option>
+                            <option value = 'high'>High</option>
+                        </select>
+                    </div>
+                    <div class="input-group fw-ig">
                         <span class="input-group-addon">Likelihood:</span>
-                        <select class="form-control" name="likelihood" id="likelihood">
-                            <option selected>1 - Extremely likely</option>
-                            <option>2</option>
-                            <option>3</option>
-                            <option>4</option>
-                            <option>5 - Neither likely/unlikely</option>
-                            <option>6</option>
-                            <option>7</option>
-                            <option>8</option>
-                            <option>9 - Extremely likely</option>                            
+                        <select class="form-control" name="likelihood" id="edit-con-likelihood">
+                            <option value = '1' selected>1 - Extremely likely</option>
+                            <option value = '2'>2</option>
+                            <option value = '3'>3</option>
+                            <option value = '4'>4</option>
+                            <option value = '5'>5 - Neither likely/unlikely</option>
+                            <option value = '6'>6</option>
+                            <option value = '7'>7</option>
+                            <option value = '8'>8</option>
+                            <option value = '9'>9 - Extremely unlikely</option>                            
                         </select>
                     </div>                
                 </div>
@@ -152,6 +185,43 @@
             </div>
         </div>
     </div>
+
+    <div class="modal fade cannot-edit" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title">Warning!!!</h4>
+                </div>                
+                <div class="modal-body">
+                    <p>Main trend or decision node cannot be editted or deleted.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>                    
+                </div>
+            </div>
+            <!-- /.modal-content -->
+        </div>
+        <!-- /.modal-dialog -->
+    </div>
+    <!-- /.modal -->
+
+    <div class="modal fade open-project" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title">Saved Projects</h4>
+                </div>                
+                <div class="modal-body saved-projects">                    
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>                    
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div id="tree-container" class="container">
         <div class="row fill">
             <div class='col-md-2 left-panel'>
@@ -164,33 +234,37 @@
                 </div>                                    
                 <div class="row">
                     <div class="form-group">
-                        <label for="mainEventInput">Event, Change or Trend</label>
-                        <input type="text" class="form-control event-margin" id="mainEventInput" placeholder="Event or Change">
-                        <input type="button" data-role='create-event' name="create-button" id="create-button" class="btn create-button" value="Create Event">
-                        <input type="button" name="search-policy-button" id="search-policy-button" class="btn create-button disabled" value="Search Policies"> 
+                        <label for="mainEventInput">Search by Consequence/Policies</label>
+                        <input type="text" class="form-control event-margin" id="searchInput" placeholder="Search content">
+                        <input type="button" data-role='create-event' name="search-con-button" id="search-con-button" class="btn create-button" value="Search by Consequence">
+                        <input type="button" name="search-policy-button" id="search-policy-button" class="btn create-button" value="Search by Policy"> 
                     </div>                                                              
                 </div>
                 <div class="row" >
                     <div class="list-group">
-                        <a href="#" class="list-group-item">
+                        <a href="javascript:void(0)" id='fw-create-new' class="list-group-item">
+                            <span class="glyphicon glyphicon-plus glyphicon-margin"></span>Create New Project</a>
+                        <a href="javascript:void(0)" id='fw-view-items' class="list-group-item">
                             <span class="glyphicon glyphicon-saved glyphicon-margin"></span>View Saved items</a>
-                        <a href="#" class="list-group-item">
+                        <a href="javascript:void(0)" id='fw-save-project' class="list-group-item">
                             <span class="glyphicon glyphicon-save glyphicon-margin"></span>Save Project</a>
-                        <a href="#" class="list-group-item">
+                        <a href="javascript:void(0)" id='fw-delete-project' class="list-group-item">
+                            <span class="glyphicon glyphicon-remove-circle glyphicon-margin"></span>Delete Project</a>
+                        <a href="javascript:void(0)" class="list-group-item">
                             <span class="glyphicon glyphicon-share glyphicon-margin"></span>Share Project</a>
-                        <a href="#" class="list-group-item">
+                        <a href="javascript:void(0)" class="list-group-item">
                             <span class="glyphicon glyphicon-export glyphicon-margin"></span>Export Project</a>
-                        <a href="#" class="list-group-item">
+                        <a href="javascript:void(0)" class="list-group-item">
                             <span class="glyphicon glyphicon-list-alt glyphicon-margin"></span>View Policies</a>
                     </div>
                 </div>
                 <div class="row" >
                     <div class="list-group">
-                        <a href="#" class="list-group-item">
+                        <a href="javascript:void(0)" class="list-group-item">
                             <span class="glyphicon glyphicon-cog glyphicon-margin"></span>Manage app settings</a>
-                        <a href="#" class="list-group-item">
+                        <a href="javascript:void(0)" class="list-group-item">
                             <span class="glyphicon glyphicon-user glyphicon-margin"></span>Manage account Information</a>
-                        <a href="#" class="list-group-item">
+                        <a href="javascript:void(0)" class="list-group-item">
                             <span class="glyphicon glyphicon-question-sign glyphicon-margin"></span>View FAQ/Help Page</a>
                         <a href="/logout" class="list-group-item">
                             <span class="glyphicon glyphicon-log-out glyphicon-margin"></span>Logout</a>

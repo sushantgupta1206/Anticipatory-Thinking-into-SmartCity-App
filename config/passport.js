@@ -98,15 +98,14 @@ module.exports = function(passport) {
         })
     );
 
- passport.use('local-login', 
+    passport.use('local-login', 
         new LocalStrategy({
             usernameField : 'username',
             passwordField : 'password',
             passReqToCallback : true
         }, 
         function(req, username, password, done){
-
-connection.query("select * from users where username = ?",[username], function(err, rows){
+            connection.query("select * from users where username = ?",[username], function(err, rows){
                 if (err)
                     return done(err);
                 if (!rows.length) {
@@ -123,7 +122,7 @@ connection.query("select * from users where username = ?",[username], function(e
                         var attempts = rows[0].attempts;
                         var sql_query = "UPDATE users SET attempts = " + --attempts + " WHERE username = '" + username + "';";
                         console.log(sql_query);
-                        connection.query(sql_query, function (err, rows) {
+                        connection.query(sql_query, function (err, result) {
                             if (err)
                                 return done(err);
                             console.log('Updating the number of attempts ' + attempts);
@@ -137,15 +136,14 @@ connection.query("select * from users where username = ?",[username], function(e
                     }
                     var update_query = "UPDATE users SET attempts = 3 WHERE username = '" + username + "';";
                     console.log(update_query);
-                    connection.query(update_query, function (err, rows) {
+                    connection.query(update_query, function (err, result) {
                         if (err)
                             return done(err);
-						console.log('Success!');
-						return done(null, rows[0]);
-					});
-                }                
+                        console.log('Success!');
+                        return done(null, rows[0]);
+                    });
+                }           
             });
-		}
-		)
-		);
+        })
+    );
 };

@@ -6,6 +6,17 @@ html, body, .container{
 	margin: 0; 
 }
 
+.popover {
+	background-color: lightsteelblue;
+	border-color: lightsteelblue;
+	color: black;
+	font-family: Verdana;
+}
+
+.popover.right .arrow:after {
+	border-right-color: lightsteelblue;
+}
+
 .fill {
     width:100%;
     height:100%;
@@ -13,7 +24,7 @@ html, body, .container{
 }
 
 .overlay {
-	background-color: #EEE;
+	background-color: white;
 }
 
 .left-panel {
@@ -36,7 +47,7 @@ html, body, .container{
 }
 
 .overlay{
-    background-color:#EEE;
+    background-color:white;
 }
  
 .node circle {
@@ -242,4 +253,26 @@ html, body, .container{
 
 .fw-alert{
 	margin-bottom: 0px;
+}
+
+.fw-ig{
+	margin-bottom: 15px;
+}
+
+.fw-ig:last-child{
+	margin-bottom: 0px;
+}
+
+hr{
+	margin-top: 0px;
+	margin-bottom: -2px;
+}
+
+.popover-labels{
+	font-weight: bold;
+}
+
+.info-group.required .control-label:before {
+  content:"*";
+  color:red;
 }

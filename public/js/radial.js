@@ -1,11 +1,14 @@
 var tree_root = null;
 var outer_update = null;
+var outer_click = null;
+var tree_nodes = null;
 
 var create_node_parent = null;
 var node_to_edit = null;
 var create_node_modal_active = false;
 var edit_modal_active = false
 var i = 0;
+var project_name = null;
 
 function create_node(type){            
     if(create_node_parent && create_node_modal_active){
@@ -20,6 +23,10 @@ function create_node(type){
         name = $('#newEffectName').val();        
         var new_node = {
             'name': name,
+            'likelihood': $('#con-likelihood').val(),
+            'comments': $('#con-comment').val(),
+            'importance': $('#con-importance').val(),
+            'policies': ['EP 5.1'],
             'id': id,
             'type': type,
             'depth':create_node_parent.depth + 1,
@@ -36,7 +43,25 @@ function create_node(type){
 }
 
 function edit_node(){
-    console.log('TODO - Edit node');
+    if(node_to_edit && edit_modal_active){
+        node_to_edit.name = $('#renamedEffectName').val();;
+        node_to_edit.type = $('#edit-con-impact').val();
+        node_to_edit.importance = $('#edit-con-importance').val();
+        node_to_edit.comments = $('#edit-con-comment').val();
+        node_to_edit.likelihood = $('#edit-con-likelihood').val();
+        edit_modal_active = false;
+        console.log(node_to_edit);
+        $('#editModal').modal('toggle');
+    }    
+    //Add time delay here.
+    var timesRun = 0;
+    var interval = setInterval(function(){
+        timesRun += 1;
+        if(timesRun === 2){
+            clearInterval(interval);
+        }
+        $("#node" + node_to_edit.parent.id).d3Click();
+    }, 1000);    
 }
 
 function draw_tree(treeData){
@@ -61,35 +86,75 @@ function draw_tree(treeData){
 
     var menu = [
         {
-                title: 'Create new consequence',
-                action: function(elm, d, i) {
-                        console.log('Create child node');
-                        create_node_parent = d;                            
-                        create_node_modal_active = true;
-                        $('#CreateNodeName').focus();
-                }
+            title: 'Create new consequence',
+            action: function(elm, d, i) {
+                console.log('Create child node');
+                create_node_parent = d;                            
+                create_node_modal_active = true;                
+                $("#newEffectName").val('');
+                $('#con-comment').val('');
+                $('#con-impact').val('neutral');
+                $('#con-importance').val('low');
+                $('#con-likelihood').val('1');
+                $('#CreateNodeName').focus();
+            }
         },
         {
-                title: 'Edit consequence',
-                action: function(elm, d, i) {
-                        console.log('Edit consequence');
-                        node_to_edit = d;
-                        edit_node();
-                }
+            title: 'Edit consequence',
+            action: function(elm, d, i) {
+                console.log('Edit consequence');
+                if(d.root_ind){
+                    $('.cannot-edit').modal('toggle');
+                }else{
+                    $('#editModal').modal('toggle');
+                    $("#renamedEffectName").val(d.name);
+                    $('#edit-con-comment').val(d.comments);
+                    $('#edit-con-impact').val(d.type);
+                    $('#edit-con-importance').val(d.importance);
+                    $('#edit-con-likelihood').val(d.likelihood);
+                    edit_modal_active = true;
+                    node_to_edit = d;
+                    $("#renamedEffectName").focus();
+                }                
+            }
         },
         {
-                title: 'Delete consequence',
-                action: function(elm, d, i) {
-                        console.log('Delete node');
-                        delete_node(d);
-                }
-        },        
+            title: 'Get suggestions',
+            action: function(elm, d, i) {
+                console.log('Clicked get suggestions');                    
+            }
+        },
         {
-                title: 'Get suggestions',
-                action: function(elm, d, i) {
-                        console.log('Clicked get suggestions');
-                        
+			divider: true
+        },
+        {
+            title: 'Delete consequence',
+            action: function(elm, d, i) {
+                console.log('Delete node');
+                if(d.root_ind){
+                    $('.cannot-edit').modal('toggle');
+                }else{
+                    delete_node(d);
                 }
+            }
+        }                
+    ];
+
+    var root_node_menu = [
+        {
+            title: 'Create new consequence',
+            action: function(elm, d, i) {
+                console.log('Create child node');
+                create_node_parent = d;                            
+                create_node_modal_active = true;
+                $('#CreateNodeName').focus();
+            }
+        },
+        {
+            title: 'Get suggestions',
+            action: function(elm, d, i) {
+                console.log('Clicked get suggestions');                   
+            }
         }
     ];
 
@@ -356,7 +421,6 @@ function draw_tree(treeData){
     }
 
     var overCircle = function (d) {
-        console.log(d);
         selectedNode = d;
         updateTempConnector();
     };
@@ -420,6 +484,7 @@ function draw_tree(treeData){
 
     // Toggle children on click.
     function click(d) {
+        console.log(d);
         if (d3.event.defaultPrevented && d.depth != 0) 
             return; // click suppressed
         d = toggleChildren(d);
@@ -449,12 +514,12 @@ function draw_tree(treeData){
         links = tree.links(nodes);
 
         // Set widths between levels based on maxLabelLength.
-        //        nodes.forEach(function(d) {
+                nodes.forEach(function(d) {
         //            d.y = (d.depth * (maxLabelLength * 10)); //maxLabelLength * 10px
         //            // alternatively to keep a fixed scale one can set a fixed depth per level
         //            // Normalize for fixed-depth by commenting out below line
-        //            // d.y = (d.depth * 500); //500px per level.
-        //        });
+                     d.y = (d.depth * 150); //500px per level.
+                });
 
         // Update the nodes…
         node = svgGroup.selectAll("g.node")
@@ -465,22 +530,41 @@ function draw_tree(treeData){
         // Enter any new nodes at the parent's previous position.
         var nodeEnter = node.enter().append("g")
             .call(dragListener)
-            .attr("class", "node")
+            .attr("class", function(d){
+                if(d.root_ind && d.root_ind == 1)
+                    return "node root-node";
+                return "node";
+            })
+            .attr('id', function(d){
+                return "node" + d.id;
+            })
             .on('click', click)
+            .attr('data-toggle', 'popover')
+            .attr('data-trigger', 'hover')
+            .attr('data-placement', 'right')
+            .attr('data-html', true)
+            .attr('data-content', function(d){
+                if(!d.root_ind)
+                    return "<span class='popover-labels'>Impact: </span>" + d.type.toUpperCase() + "<br/>" +
+                    "<span class='popover-labels'>Comments: </span>" + d.comments + "<br/>" +
+                    "<span class='popover-labels'>Policies: </span>" + d.policies + "<br/>" +
+                    "<span class='popover-labels'>Likelihood: </span>" + d.likelihood + "<br/>" +                    
+                    "<span class='popover-labels'>Importance: </span>" + d.importance.toUpperCase() + "<br/>";
+            });
 
         nodeEnter.append("circle")
             .attr('class', 'nodeCircle')
             .attr("r", 1e-6)
             .style("fill", function (d) {
-                return d._children ? "lightsteelblue" : "#fff";
+                return d._children ? "#2980b9" : "#fff";
             })
-            .on('contextmenu', d3.contextMenu(menu));
+            .on('contextmenu', d3.contextMenu(menu));            
 
         nodeEnter.append("text")
             .text(function (d) {
                 return d.name;
             })
-            .style("font", "10px serif")
+            .style("font", "10px verdana")
             .style("opacity", 0.9)
             .style("fill-opacity", 0);
 
@@ -504,7 +588,14 @@ function draw_tree(treeData){
         node.select("circle.nodeCircle")
             .attr("r", 4.5)
             .style("fill", function (d) {
-                return d._children ? "lightsteelblue" : "#fff";
+                if((d._children && d.type === 'positive') || d.type === 'positive')
+                    return '#2ecc71';
+                else if((d._children && d.type === 'negative') || d.type === 'negative')
+                    return '#e74c3c';
+                else if((d._children && d.type === 'neutral'))
+                    return '#2980b9';
+                else
+                    return '#fff';
             });
 
         var nodeUpdate = node.transition()
@@ -516,7 +607,14 @@ function draw_tree(treeData){
         nodeUpdate.select("circle")
             .attr("r", 4.5)
             .style("fill", function (d) {
-                return d._children ? "lightsteelblue" : "#fff";
+                if((d._children && d.type === 'positive') || d.type === 'positive')
+                    return '#2ecc71';
+                else if((d._children && d.type === 'negative') || d.type === 'negative')
+                    return '#e74c3c';
+                else if((d._children && d.type === 'neutral'))
+                    return '#2980b9';
+                else
+                    return '#fff';
             });
 
         // Fade the text in
@@ -590,6 +688,12 @@ function draw_tree(treeData){
             d.x0 = d.x;
             d.y0 = d.y;
         });
+
+        $('[data-toggle="popover"]').not('.root-node').popover({
+            'container': 'body'            
+        });
+
+        tree_nodes = nodes;
     }
 
     // Append a group which holds all nodes and which the zoom Listener can act upon.
@@ -601,6 +705,8 @@ function draw_tree(treeData){
     });
 
     outer_update = update;
+    outer_click = click;
+    outer_toggle = toggleChildren;
     // Layout the tree initially and center on the root node.
     update(root);
     tree_root = root;    

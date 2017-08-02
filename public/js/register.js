@@ -90,7 +90,6 @@ $(document).ready(function(){
             $('#username').focus();
             return false;
         }
-
         return true;
     });
 
@@ -125,9 +124,7 @@ $(document).ready(function(){
             $("#reset_pwd_cnf").focus();
             return false;
         }
-
-        console.log("Validated!!");
-        
+        console.log("Validated!!");        
         return isValidInput;
     });
 	
