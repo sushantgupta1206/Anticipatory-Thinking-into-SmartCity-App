@@ -117,7 +117,8 @@ CREATE TABLE `users` (
   `question` varchar(100) DEFAULT NULL,
   `answer` varchar(20) DEFAULT NULL,
   `verified_ind` tinyint(1) DEFAULT NULL,
-  `attempts` int(11) DEFAULT '3',
+  `attempts` int(11) NOT NULL DEFAULT '3',
+  `lock_time` datetime DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `username` (`username`),
   UNIQUE KEY `email` (`email`)

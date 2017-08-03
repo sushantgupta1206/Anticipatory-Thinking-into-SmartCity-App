@@ -168,7 +168,9 @@ module.exports = function(app, passport) {
 
     app.post('/forgot', function(req, res){
         var email = req.body.forgot_email;
-        console.log("Received request to reset password for " + email);
+		//connection.query(update_verif_query, [token, sql_date, username], function(error, result){
+        //}
+		console.log("Received request to reset password for " + email);
         var transporter = nodemailer.createTransport({
             service: 'gmail',
             auth: {

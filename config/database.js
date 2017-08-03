@@ -2,7 +2,7 @@ module.exports = {
     connection: {
         host: 'localhost',
         user: 'root',
-        password: 'root'
+        password: ''
     },
     database: 'fw'
 };

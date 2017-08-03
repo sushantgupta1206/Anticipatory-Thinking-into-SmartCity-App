@@ -105,7 +105,8 @@ module.exports = function(passport) {
             passReqToCallback : true
         }, 
         function(req, username, password, done){
-            connection.query("select * from users where username = ?",[username], function(err, rows){
+
+			connection.query("select * from users where username = ?",[username], function(err, rows){
                 if (err)
                     return done(err);
                 if (!rows.length) {
@@ -117,33 +118,87 @@ module.exports = function(passport) {
                     connection.query("select * from users where username = ?", [username], function (err, rows) {
                         if (err) 
                             return done(err);
-                        if (rows[0].attempts == 0)
-                            return done(null, false, req.flash('loginMsg', 'Please reset your password as max attempts are completed.'));
-                        var attempts = rows[0].attempts;
+                        if (rows[0].attempts == 1){
+							//var SECS_IN_DAY = 24*60*60*1000;
+							//var date = new Date(); //moment //update query here for nattempts
+							var attempts = rows[0].attempts;
+							var date = moment.utc().format('YYYY-MM-DD HH:mm:ss'); //current time stamp //moment js
+							console.log('date in bcrypt:' +date);
+							var update_locktime_query = "UPDATE users SET lock_time = '"+date+"' , attempts =0 WHERE username = '" + username + "';";
+							console.log(update_locktime_query);
+                        	connection.query(update_locktime_query, function (err, update_rows) {
+                            if (err)
+                                return done(err);
+                            console.log('Updating the lock time');
+                        	return done(null, false, req.flash('loginMsg', 'Please reset your password as max attempts are completed or try after 24 hours.'));
+							});
+						}else if(rows[0].attempts==0){return done(null, false, req.flash('loginMsg', 'Wrong password max attempts done kindly reset passsword'));}
+						else{
+						var attempts = rows[0].attempts;
                         var sql_query = "UPDATE users SET attempts = " + --attempts + " WHERE username = '" + username + "';";
                         console.log(sql_query);
-                        connection.query(sql_query, function (err, result) {
+                        connection.query(sql_query, function (err, update_rows) {
                             if (err)
                                 return done(err);
                             console.log('Updating the number of attempts ' + attempts);
                             //var msg = (attempts + ' attempts are left to login. Username and password combination is wrong.');
-                            return done(null, false, req.flash('loginMsg', 'failed'));
+                            return done(null, false, req.flash('loginMsg', 'Try again; Total 3 attempts allowed'));
                         });
+						}
                     }); 
                 }else{
                     if(rows[0].verified_ind === 0){
                         return done(null, false, req.flash('loginMsg', 'You account has not been verified yet.'));
                     }
-                    var update_query = "UPDATE users SET attempts = 3 WHERE username = '" + username + "';";
-                    console.log(update_query);
-                    connection.query(update_query, function (err, result) {
-                        if (err)
-                            return done(err);
-                        console.log('Success!');
-                        return done(null, rows[0]);
-                    });
-                }           
+					
+                    //var date=new Date();
+					var date = moment.utc().format('YYYY-MM-DD HH:mm:ss'); //current time stamp //moment js
+					var date_local=new Date(date + "Z");
+					console.log('date:' + date); // GMT Time
+					console.log('date in local: '+date_local);
+					console.log('locktime:' +rows[0].lock_time);
+					//console.log(rows[0].lock_time); // Local Time  (kuch toh machqa hai)
+					var locked_date = new Date(rows[0].lock_time + "Z");
+                    console.log('locked_date: ' +locked_date); //Local Time
+                    console.log('locked date get time: '+locked_date.getTime()); //difference is microseconds
+                    console.log('Difference - ' + (date_local - locked_date)); 
+                    if(rows[0].lock_time==null){
+						console.log("entering the lockdate =null if consition");
+						var update_query = "UPDATE fw.users SET attempts = 3 WHERE username = '" + username + "';";
+						console.log(update_query);
+						connection.query(update_query, function (err, update_rows) {
+							if (err)
+								return done(err);
+							console.log('Success!');
+							//console.log(row[0]);
+							return done(null, rows[0]);//should go to main home page of FW
+					
+					});	
+					}else{
+						console.log('entering the else condition for locked_date not null');
+						var time_diff = (date_local - locked_date);
+						var SECS_IN_DAY= 24*60*60*1000;
+						console.log("time limit of days: " + SECS_IN_DAY);
+						console.log("difference of time now: "+time_diff);
+						if(locked_date!=null && time_diff >= SECS_IN_DAY){
+							var reset_lock_query = "update fw.users set lock_time = NULL, attempts =3 where username = '" + username + "';";
+							//var update_query = "UPDATE users SET attempts = 3 WHERE username = '" + username + "';";
+							console.log(reset_lock_query);
+							connection.query(reset_lock_query, function (err, update_rows) {
+								if (err)
+									return done(err);
+							console.log('Lock time reset to null!');
+						//return done(null, rows[0]);
+							console.log('Success!');
+							return done(null, rows[0]);
+										
+						});
+					}else return done(null, false, req.flash('loginMsg', 'Account still locked'));
+					
+					}
+				}                
             });
-        })
-    );
+		}
+		)
+		);
 };
