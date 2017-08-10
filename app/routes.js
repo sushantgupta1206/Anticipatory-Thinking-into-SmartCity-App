@@ -163,14 +163,23 @@ module.exports = function(app, passport) {
     });
 
     app.get('/forgot', function(req, res){
-        res.render('forgot.ejs');
+        res.render('forgot.ejs',{forMsg: ""});
     });
 
     app.post('/forgot', function(req, res){
-        var email = req.body.forgot_email;
-		//connection.query(update_verif_query, [token, sql_date, username], function(error, result){
-        //}
-		console.log("Received request to reset password for " + email);
+        var forEmail = req.body.forgot_email;
+		connection.query("select * from users where email = ?", [forEmail], function(err, rows){
+			if(err) {
+                //If there is any error, then print in console
+                console.log('Error while checking if email address is valid.' + err);
+            } else if(!rows.length) {
+                //If no rows were retrieved, then the email address does not exist in records
+				console.log('No such email id found');
+				//return done(null, false, req.flash('forgotMsg', 'Email id not in database'));
+				res.render('forgot.ejs', {forMsg: 'No such email address found.'});
+            } 
+			else {
+		console.log("Received request to reset password for " + forEmail);
         var transporter = nodemailer.createTransport({
             service: 'gmail',
             auth: {
@@ -179,18 +188,20 @@ module.exports = function(app, passport) {
             }
         });
 
-        var link = "http://" + req.get('host') + "/reset?email=" + email + "&token=" + bcrypt.hashSync(email, null, null);
+        var link = "http://" + req.get('host') + "/reset?email=" + forEmail + "&token=" + bcrypt.hashSync(forEmail, null, null);
         console.log("Password Reset URL - " + link);
 
         transporter.sendMail({
             from: 'scat.noreply@gmail.com',
-            to: email,
+            to: forEmail,
             subject: 'Reset Password Email',
             text: 'Please click this link(' + link + ') to reset your account password'
         });       
 
         console.log("Reset passsword link emailed!!");
         res.render('login.ejs', {message: ""});
+	}
+	});
     });
 
     app.get('/reset', function(req, res){

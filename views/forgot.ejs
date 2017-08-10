@@ -27,7 +27,13 @@
 							</div>							
 						</div>
 						<hr>
-					</div>					
+					</div>
+					<% if (forMsg.length > 0) { %>
+						<div class="alert alert-danger alert-dismissable fw-alert">
+							<a href="#" class="close" data-dismiss="alert" aria-label="close">×</a>
+							<%= forMsg %>
+						</div>
+					<% } %>
 					<div class="auth-error-message"></div>
                     <div class="panel-body">
 						<div class="row">
