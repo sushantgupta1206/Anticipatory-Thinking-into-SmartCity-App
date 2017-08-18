@@ -459,6 +459,33 @@ module.exports = function(app, passport) {
             });            
         }
     });
+
+    app.post('/delete_project', function(req, res){    
+        pname = req.body.pname;
+        pid = req.body.pid;
+        console.log(req.body);
+        connection.query('select * from projects p where p.pname = ? and p.powner = ?;', [pname, req.user.username], function(error, rows){
+            if(error){
+                console.log(error);
+                res.status(500).send('Error deleting project');
+            }else if(!rows.length){
+                console.log(error);
+                res.status(500).send('Project not found or only project owner can delete the project');
+            }else{
+                pid = rows[0].pid;
+                console.log('Going to delete project');
+                connection.query('delete from projects where pid = ' + pid, function(error, result){
+                    if(error){
+                        console.log(error);
+                        res.status(500).send('Error deleting project');
+                    }else{
+                        console.log('Number of affected rows - ' + result.affectedRows);
+                        res.status(200).send('Project successfully deleted');
+                    }
+                });
+            }
+        });
+    });
 };
 
 function isLoggedIn(req, res, next) {

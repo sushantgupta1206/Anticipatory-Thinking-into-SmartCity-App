@@ -514,12 +514,12 @@ function draw_tree(treeData){
         links = tree.links(nodes);
 
         // Set widths between levels based on maxLabelLength.
-                nodes.forEach(function(d) {
+        //         nodes.forEach(function(d) {
         //            d.y = (d.depth * (maxLabelLength * 10)); //maxLabelLength * 10px
-        //            // alternatively to keep a fixed scale one can set a fixed depth per level
-        //            // Normalize for fixed-depth by commenting out below line
-                     d.y = (d.depth * 150); //500px per level.
-                });
+        //            alternatively to keep a fixed scale one can set a fixed depth per level
+        //            Normalize for fixed-depth by commenting out below line
+        //            d.y = (d.depth * 150); //500px per level.
+        //         });
 
         // Update the nodes…
         node = svgGroup.selectAll("g.node")
@@ -700,9 +700,9 @@ function draw_tree(treeData){
     var svgGroup = baseSvg.append("g").attr("transform", "translate(" + diameter / 2 + "," + diameter / 2 + ")");
 
     // Collapse all children of roots children before rendering.
-    root.children.forEach(function (child) {
-        collapse(child);
-    });
+    // root.children.forEach(function (child) {
+    //     collapse(child);
+    // });
 
     outer_update = update;
     outer_click = click;

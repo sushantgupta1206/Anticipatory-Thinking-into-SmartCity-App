@@ -1,4 +1,5 @@
 var is_existing_saved = false;
+var project_id = -1;
 
 $(document).ready(function(){
     $('#searchInput').prop("disabled", true);
@@ -140,11 +141,15 @@ $(document).ready(function(){
     $('#discardExistingProject').on('click', function(){
         discard_project();
     });
+
+    $('#fw-delete-project').on('click', function(){
+        delete_project();
+    });
 });
 
 function attachEvents(){
     $('.fw-proj-table-row').on('click', function(){
-        var pid = $(this).attr('data-pid');
+        var pid = $(this).attr('data-pid');        
         console.log(pid);
         if(pid > 0){
             $.ajax({
@@ -183,6 +188,7 @@ function attachEvents(){
                             $('.overlay').remove();
                         }
                         project_name = response.pname;
+                        project_id = pid;
                         draw_tree(tree_root);
                     }else{
 
@@ -299,4 +305,37 @@ function discard_project(){
     tree_root = null;
     tree_nodes = null;
     project_name = null;
+    project_id = -1;
+}
+
+function delete_project(){    
+    if(tree_root != null){
+        if(project_id == -1){
+            //When a new project is created but has not been saved yet
+            discard_project();
+            displayToastMessage('Project cleared from workspace');
+            return;
+        }else{
+            $.ajax({
+                'url': '/delete_project',
+                'type': 'POST',
+                'contentType': 'application/json',
+                'data': JSON.stringify({
+                    'pname': project_name,
+                    'pid': project_id
+                }),
+                'success': function(response){
+                    displayToastMessage(response);
+                    //Reset the canvas and global variables
+                    discard_project();
+                },
+                'error': function(request, status, error){
+                    displayToastMessage('Project could not be deleted.');
+                },
+                'timeout': 2000
+            });
+        }        
+    }else{
+        displayToastMessage('Nothing to delete');
+    }
 }
