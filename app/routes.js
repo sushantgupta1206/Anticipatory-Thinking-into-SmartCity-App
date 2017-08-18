@@ -166,42 +166,42 @@ module.exports = function(app, passport) {
         res.render('forgot.ejs',{forMsg: ""});
     });
 
-    app.post('/forgot', function(req, res){
+    app.post('/forgot', function (req, res) {
         var forEmail = req.body.forgot_email;
-		connection.query("select * from users where email = ?", [forEmail], function(err, rows){
-			if(err) {
+        connection.query("select * from users where email = ?", [forEmail], function (err, rows) {
+            if (err) {
                 //If there is any error, then print in console
                 console.log('Error while checking if email address is valid.' + err);
-            } else if(!rows.length) {
+            } else if (!rows.length) {
                 //If no rows were retrieved, then the email address does not exist in records
-				console.log('No such email id found');
-				//return done(null, false, req.flash('forgotMsg', 'Email id not in database'));
-				res.render('forgot.ejs', {forMsg: 'No such email address found.'});
-            } 
-			else {
-		console.log("Received request to reset password for " + forEmail);
-        var transporter = nodemailer.createTransport({
-            service: 'gmail',
-            auth: {
-                user: 'scat.noreply@gmail.com',
-                pass: 'noreplyscat1#'
+                console.log('No such email id found');
+                //return done(null, false, req.flash('forgotMsg', 'Email id not in database'));
+                res.render('forgot.ejs', { forMsg: 'No such email address found.' });
+            }
+            else {
+                console.log("Received request to reset password for " + forEmail);
+                var transporter = nodemailer.createTransport({
+                    service: 'gmail',
+                    auth: {
+                        user: 'scat.noreply@gmail.com',
+                        pass: 'noreplyscat1#'
+                    }
+                });
+
+                var link = "http://" + req.get('host') + "/reset?email=" + forEmail + "&token=" + bcrypt.hashSync(forEmail, null, null);
+                console.log("Password Reset URL - " + link);
+
+                transporter.sendMail({
+                    from: 'scat.noreply@gmail.com',
+                    to: forEmail,
+                    subject: 'Reset Password Email',
+                    text: 'Please click this link(' + link + ') to reset your account password'
+                });
+
+                console.log("Reset passsword link emailed!!");
+                res.render('login.ejs', { message: "" });
             }
         });
-
-        var link = "http://" + req.get('host') + "/reset?email=" + forEmail + "&token=" + bcrypt.hashSync(forEmail, null, null);
-        console.log("Password Reset URL - " + link);
-
-        transporter.sendMail({
-            from: 'scat.noreply@gmail.com',
-            to: forEmail,
-            subject: 'Reset Password Email',
-            text: 'Please click this link(' + link + ') to reset your account password'
-        });       
-
-        console.log("Reset passsword link emailed!!");
-        res.render('login.ejs', {message: ""});
-	}
-	});
     });
 
     app.get('/reset', function(req, res){
@@ -322,7 +322,7 @@ module.exports = function(app, passport) {
                 var values = [];
                 for(var i = 0; i < consequences.length; i++){
                     var c = consequences[i];
-                    var item = [null, c.name, c.id, c.parentid, c.likelihood, c.impact, c.importance, c.comments, rowID];
+                    var item = [null, c.name, c.id, c.parentid, c.likelihood, c.impact, c.importance, c.notes, rowID];
                     values.push(item);
                 }
                 console.log(values);
@@ -334,7 +334,7 @@ module.exports = function(app, passport) {
                         console.error('Error deleting entries in consequences table');
                         throw error;
                     }
-                    var insert_conseq_query = "insert into consequences (cid, cname, cnodeid, cparentnodeid, likelihood, impact, importance, notes, pid) values ?;";
+                    var insert_conseq_query = "insert into consequences (cid, name, cnodeid, cparentnodeid, likelihood, impact, importance, notes, pid) values ?;";
                     connection.query(insert_conseq_query, [values], function(err, result){
                         if(err){
                             console.error('Error inserting into consequences table - ' + err);
@@ -362,12 +362,12 @@ module.exports = function(app, passport) {
                     var values = [];
                     for(var i = 0; i < consequences.length; i++){
                         var c = consequences[i];
-                        var item = [null, c.name, c.id, c.parentid, c.likelihood, c.impact, c.importance, c.comments, rowID];
+                        var item = [null, c.name, c.id, c.parentid, c.likelihood, c.impact, c.importance, c.notes, rowID];
                         values.push(item);
                     }
                     console.log(values);
                     console.log('Figured out entries to be inserted into db');
-                    var insert_conseq_query = "insert into consequences (cid, cname, cnodeid, cparentnodeid, likelihood, impact, importance, notes, pid) values ?;";
+                    var insert_conseq_query = "insert into consequences (cid, name, cnodeid, cparentnodeid, likelihood, impact, importance, notes, pid) values ?;";
                     connection.query(insert_conseq_query, [values], function(err, result){
                         if(err){
                             console.error('Error inserting into consequences table - ' + err);
@@ -412,6 +412,52 @@ module.exports = function(app, passport) {
             console.log('Error with username or request object');
             res.status(400).send("HTTP Error 400 - Bad request");
         }      
+    });
+
+    app.post('/get_fw_project', function(req, res){
+        if(req.user && req.user.username){
+            var pid = req.body.pid;
+            var project_name = null;
+            console.log(req.user.username + ' has requested to view project ID - ' + pid);
+            connection.query("select * from projects p where p.pid=" + pid, function(error, result){
+                if(error){
+                    console.log(error);
+                    res.status(500).send('Error retrieving project');
+                }
+                if(!result.length){
+                    console.log('Project does not exist');
+                    res.status(500).send('Project does not exist');
+                }
+                project_name = result[0].pname;
+                if(result[0].powner == req.user.username && result[0].pid == pid){
+                    connection.query("select * from projects p, consequences c where p.pid = " + pid + " and p.pid = c.pid", function(error, rows){
+                        if(error){
+                            console.log(error);
+                            res.status(500).send('Error retrieving consequences');
+                        }else if(!rows.length){
+                            var response = {
+                                status: 200,
+                                row_length: rows.length,
+                                data: null,
+                                pname: project_name                
+                            }
+                            res.end(JSON.stringify(response));
+                        }else{
+                           console.log(rows);
+                           var response = {
+                               status: 200,
+                               row_length: rows.length,
+                               data: rows,
+                               pname: project_name
+                           }
+                           res.end(JSON.stringify(response)); 
+                        }
+                    });
+                }else{//If the owner is different, meaning shared item
+
+                }
+            });            
+        }
     });
 };
 

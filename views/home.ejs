@@ -50,6 +50,27 @@
         </div>
     </div>
 
+    <div class="modal fade project-exists" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title">What do you want to do?</h4>
+                </div>                
+                <div class="modal-body">
+                    <p>A project already exists in the application workflow. Do you want to go ahead and save it before creating a new project or discard it and then create a new project?.</p>
+                </div>
+                <div class="modal-footer">
+                    <button id='discardExistingProject' type="button" class="btn btn-primary" data-dismiss='modal'>Discard</button>                    
+                    <button id='saveExistingProject' type="button" class="btn btn-primary">Save</button>
+                </div>
+            </div>
+            <!-- /.modal-content -->
+        </div>
+        <!-- /.modal-dialog -->
+    </div>
+    <!-- /.modal -->
+
     <!-- Add new consequence Modal -->
     <div id="createNewModal" class="modal fade" role="dialog">
         <div class="modal-dialog">
@@ -221,6 +242,8 @@
             </div>
         </div>
     </div>
+
+    <div id="snackbar"></div> <!-- Display toast messages in this container -->
 
     <div id="tree-container" class="container">
         <div class="row fill">

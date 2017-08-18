@@ -24,11 +24,11 @@ function create_node(type){
         var new_node = {
             'name': name,
             'likelihood': $('#con-likelihood').val(),
-            'comments': $('#con-comment').val(),
+            'notes': $('#con-comment').val(),
             'importance': $('#con-importance').val(),
             'policies': ['EP 5.1'],
             'id': id,
-            'type': type,
+            'impact': type,
             'depth':create_node_parent.depth + 1,
             'children': [],
             '_children': null
@@ -45,9 +45,9 @@ function create_node(type){
 function edit_node(){
     if(node_to_edit && edit_modal_active){
         node_to_edit.name = $('#renamedEffectName').val();;
-        node_to_edit.type = $('#edit-con-impact').val();
+        node_to_edit.impact = $('#edit-con-impact').val();
         node_to_edit.importance = $('#edit-con-importance').val();
-        node_to_edit.comments = $('#edit-con-comment').val();
+        node_to_edit.notes = $('#edit-con-comment').val();
         node_to_edit.likelihood = $('#edit-con-likelihood').val();
         edit_modal_active = false;
         console.log(node_to_edit);
@@ -108,8 +108,8 @@ function draw_tree(treeData){
                 }else{
                     $('#editModal').modal('toggle');
                     $("#renamedEffectName").val(d.name);
-                    $('#edit-con-comment').val(d.comments);
-                    $('#edit-con-impact').val(d.type);
+                    $('#edit-con-comment').val(d.notes);
+                    $('#edit-con-impact').val(d.impact);
                     $('#edit-con-importance').val(d.importance);
                     $('#edit-con-likelihood').val(d.likelihood);
                     edit_modal_active = true;
@@ -545,8 +545,8 @@ function draw_tree(treeData){
             .attr('data-html', true)
             .attr('data-content', function(d){
                 if(!d.root_ind)
-                    return "<span class='popover-labels'>Impact: </span>" + d.type.toUpperCase() + "<br/>" +
-                    "<span class='popover-labels'>Comments: </span>" + d.comments + "<br/>" +
+                    return "<span class='popover-labels'>Impact: </span>" + d.impact.toUpperCase() + "<br/>" +
+                    "<span class='popover-labels'>Notes: </span>" + d.notes + "<br/>" +
                     "<span class='popover-labels'>Policies: </span>" + d.policies + "<br/>" +
                     "<span class='popover-labels'>Likelihood: </span>" + d.likelihood + "<br/>" +                    
                     "<span class='popover-labels'>Importance: </span>" + d.importance.toUpperCase() + "<br/>";
@@ -588,11 +588,11 @@ function draw_tree(treeData){
         node.select("circle.nodeCircle")
             .attr("r", 4.5)
             .style("fill", function (d) {
-                if((d._children && d.type === 'positive') || d.type === 'positive')
+                if((d._children && d.impact === 'positive') || d.impact === 'positive')
                     return '#2ecc71';
-                else if((d._children && d.type === 'negative') || d.type === 'negative')
+                else if((d._children && d.impact === 'negative') || d.impact === 'negative')
                     return '#e74c3c';
-                else if((d._children && d.type === 'neutral'))
+                else if((d._children && d.impact === 'neutral'))
                     return '#2980b9';
                 else
                     return '#fff';
@@ -607,11 +607,11 @@ function draw_tree(treeData){
         nodeUpdate.select("circle")
             .attr("r", 4.5)
             .style("fill", function (d) {
-                if((d._children && d.type === 'positive') || d.type === 'positive')
+                if((d._children && d.impact === 'positive') || d.impact === 'positive')
                     return '#2ecc71';
-                else if((d._children && d.type === 'negative') || d.type === 'negative')
+                else if((d._children && d.impact === 'negative') || d.impact === 'negative')
                     return '#e74c3c';
-                else if((d._children && d.type === 'neutral'))
+                else if((d._children && d.impact === 'neutral'))
                     return '#2980b9';
                 else
                     return '#fff';
