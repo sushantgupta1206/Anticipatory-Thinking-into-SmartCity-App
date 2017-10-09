@@ -10,4 +10,4 @@ Anticipatory Thinking project for City Planning
 ## Setting up the database
 1. Install MySQL in your local system.
 2. Create a user with username and password as `root`.
-3. Import the schema.sql file from `config\sql` folder.
+3. Import the `new_schema.sql` file from `config\sql` folder.
