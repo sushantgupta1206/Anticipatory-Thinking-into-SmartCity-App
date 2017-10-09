@@ -145,6 +145,47 @@ $(document).ready(function(){
     $('#fw-delete-project').on('click', function(){
         delete_project();
     });
+
+    $("#fw-view-policies").on('click', function(){
+        $.ajax({
+            'url': '/view_policies',
+            'type': 'POST',
+            'success': function (response) {
+                response = JSON.parse(response);
+                console.log(response);    
+                var html = '<table class="table table-hover table-bordered">' + 
+                '<thead>' +
+                '<tr class="fw-policy-table-head">' +
+                    '<th>Identifier</th>' +
+                    '<th>Name</th>' +
+                    '<th>Category</th>' +
+                    '<th>Description</th>' +
+                '</tr>' +
+                '</thead>' +
+                '<tbody>';
+                for(var i = 0; i < response.data.length; i++){
+                    var pid = response.data[i].policyid;
+                    var pname = response.data[i].policy_name;
+                    var category = response.data[i].policy_category;
+                    var desc = response.data[i].policy_desc;
+                    html += '<tr class="fw-policy-row">' +
+                                '<td>' + pid + '</td>' +
+                                '<td>' + pname + '</td>' + 
+                                '<td>' + category + '</td>' + 
+                                '<td>' + desc + '</td>' +
+                            '</tr>';
+                }                    
+                html += '</tbody></table>';                
+                
+                $('.view-policies').html(html);
+                $('.view-policy').modal('toggle');            
+            },
+            'error': function(request, status, error){
+                displayToastMessage('Policies could not be retrieved.');                
+            },
+            'timeout': 5000//timeout of the ajax call
+        });
+    });
 });
 
 function attachEvents(){
@@ -191,7 +232,9 @@ function attachEvents(){
                         project_id = pid;
                         draw_tree(tree_root);
                     }else{
-
+                        project_id = pid;
+                        project_name = response.pname;
+                        displayToastMessage('No consequences created for the wheel');
                     }
                                         
                     $('.open-project').modal('toggle');
@@ -336,6 +379,28 @@ function delete_project(){
             });
         }        
     }else{
-        displayToastMessage('Nothing to delete');
+        if(project_id != -1){
+            $.ajax({
+                'url': '/delete_project',
+                'type': 'POST',
+                'contentType': 'application/json',
+                'data': JSON.stringify({
+                    'pname': project_name,
+                    'pid': project_id
+                }),
+                'success': function(response){
+                    displayToastMessage(response);
+                    //Reset the canvas and global variables
+                    discard_project();
+                },
+                'error': function(request, status, error){
+                    displayToastMessage('Project could not be deleted.');
+                },
+                'timeout': 2000
+            });
+        }else{
+            displayToastMessage('Nothing to delete');
+        }
     }
 }
+

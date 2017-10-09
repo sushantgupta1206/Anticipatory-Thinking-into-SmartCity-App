@@ -243,6 +243,22 @@
         </div>
     </div>
 
+    <div class="modal fade view-policy" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title">View Policies</h4>
+                </div>                
+                <div class="modal-body view-policies">                    
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>                    
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div id="snackbar"></div> <!-- Display toast messages in this container -->
 
     <div id="tree-container" class="container">
@@ -251,7 +267,7 @@
                 <div class="row welcome-section">
                     <div class="col-lg-12">
                         Hello
-                            <%= user.name %>
+                            <%= user.fullname %>
                         !!!                        
                     </div>                    
                 </div>                                    
@@ -277,7 +293,7 @@
                             <span class="glyphicon glyphicon-share glyphicon-margin"></span>Share Project</a>
                         <a href="javascript:void(0)" class="list-group-item">
                             <span class="glyphicon glyphicon-export glyphicon-margin"></span>Export Project</a>
-                        <a href="javascript:void(0)" class="list-group-item">
+                        <a href="javascript:void(0)" id="fw-view-policies" class="list-group-item">
                             <span class="glyphicon glyphicon-list-alt glyphicon-margin"></span>View Policies</a>
                     </div>
                 </div>

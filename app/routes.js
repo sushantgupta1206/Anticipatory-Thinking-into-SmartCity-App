@@ -4,9 +4,14 @@ var bodyParser = require('body-parser');
 var express = require('express');
 var app = express();
 var mysql = require('mysql');
-var dbconfig = require('../config/database');
-var connection = mysql.createConnection(dbconfig.connection);
-connection.query('USE ' + dbconfig.database);
+var config = require('../config/config');
+var connection = mysql.createConnection({
+    'host': config.host,
+    'user': config.username,
+    'password': config.password,
+    'database': config.database
+});
+connection.connect();
 var bcrypt = require('bcrypt-nodejs');
 var nodemailer = require('nodemailer');
 var moment = require('moment');
@@ -18,16 +23,35 @@ app.use(bodyParser.urlencoded({
 app.use(expressValidator());
 
 module.exports = function(app, passport) {
-    app.get('/', function(req, res){
-        console.log("Going to render login page");
+    app.get('/', function (req, res) {
         res.render('login.ejs', {message: req.flash('loginMsg')});
     });
 
-    app.get('/login', redirectToHome, function(req, res){
-        console.log("Going to render login page");
+    app.get('/login', function (req, res) {
         res.render('login.ejs', {message: req.flash('loginMsg')});
     });
 
+    app.get('/home', isLoggedIn, function (req, res) {
+        console.log(req.user);
+        res.render('home.ejs', { user: req.user });
+    });
+
+    // route for logging out
+    app.get('/logout', function (req, res) {
+        req.logout();
+        res.redirect('/');
+    });
+
+    app.get('/auth/google', passport.authenticate('google', {
+        scope: ['profile', 'email']
+    }));
+
+    app.get('/auth/google/callback', passport.authenticate('google', {
+        successRedirect: '/home',
+        failureRedirect: '/'
+    }));
+
+/*
     app.get('/register', function(req, res){
         console.log("Going to render signup page");
         res.render('signup.ejs', {message: req.flash('registerMsg')});
@@ -43,18 +67,6 @@ module.exports = function(app, passport) {
         res.render('resend.ejs', {resendMsg: null});
     });
 
-    app.post('/register', passport.authenticate('local-signup', {
-		successRedirect : '/login',
-		failureRedirect : '/register',
-		failureFlash : true
-	}));
-
-    app.post('/login', passport.authenticate('local-login', {
-        successRedirect: '/home',
-        failureRedirect: '/',
-        failureFlash: true
-    }));
-
     app.get('/home', isLoggedIn, function(req, res){
         //console.log(req);
         console.log("Going to render home page");
@@ -62,7 +74,7 @@ module.exports = function(app, passport) {
             user: req.user
         });
     });
-
+*/
     app.get('/logout', function(req, res) {
         console.log("Logging out of application");
 		req.logout();
@@ -199,7 +211,7 @@ module.exports = function(app, passport) {
                 });
 
                 console.log("Reset passsword link emailed!!");
-                res.render('login.ejs', { message: "" });
+                resres.render('login.ejs', { message: "" });
             }
         });
     });
@@ -483,6 +495,22 @@ module.exports = function(app, passport) {
                         res.status(200).send('Project successfully deleted');
                     }
                 });
+            }
+        });
+    });
+
+    app.post('/view_policies', function(req, res){
+        console.log('View policies request');
+        connection.query("select * from policies", function(err, result){
+            if(err){
+                res.status(500).send('Failed to retrieve policies');                
+            }else{
+                console.log(result);
+                var response = {
+                    status: 200,
+                    data: result,
+                }
+                res.end(JSON.stringify(response)); 
             }
         });
     });

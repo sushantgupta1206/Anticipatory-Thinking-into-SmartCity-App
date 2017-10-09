@@ -4,14 +4,25 @@ var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var expressValidator = require('express-validator');
 var methodOverride = require('method-override');
-
+var util = require('util');
+var mysql = require('mysql');
+var config = require('./config/config');
 var app = express();
-var port = process.env.PORT || 3000;
+var port = process.env.PORT || 8080;
 
 var passport = require('passport');
 var flash = require('connect-flash');
 
 require('./config/passport')(passport);
+
+var connection = mysql.createConnection({
+    'host': config.host,
+    'user': config.username,
+    'password': config.password,
+    'database': config.database
+});
+
+connection.connect();
 
 app.use(express.static(__dirname + '/public'));
 app.use(cookieParser());
