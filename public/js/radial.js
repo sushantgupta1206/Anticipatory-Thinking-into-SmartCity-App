@@ -20,13 +20,18 @@ function create_node(type){
             create_node_parent.children = [];
         }
         var id = ++i;        
-        name = $('#newEffectName').val();        
+        name = $('#newEffectName').val();
+        var selected_policies = [];
+        $("input.new-tagged-policy:checkbox:checked").each(function() {
+            selected_policies.push($(this).data('policy-id').toString());
+        });
+        console.log(selected_policies);
         var new_node = {
             'name': name,
             'likelihood': $('#con-likelihood').val(),
             'notes': $('#con-comment').val(),
             'importance': $('#con-importance').val(),
-            'policies': ['EP 5.1'],
+            'policies': selected_policies,
             'id': id,
             'impact': type,
             'depth':create_node_parent.depth + 1,
@@ -36,7 +41,7 @@ function create_node(type){
         console.log('Create Node name: ' + name);
         create_node_parent.children.push(new_node);
         create_node_modal_active = false;
-        $('#newEffectName').val('');
+        $('#newEffectName').val('');        
         $('#createNewModal').modal('toggle');
     }
     outer_update(create_node_parent);
@@ -44,6 +49,10 @@ function create_node(type){
 
 function edit_node(){
     if(node_to_edit && edit_modal_active){
+        node_to_edit.policies = [];
+        $("input.edit-tagged-policy:checkbox:checked").each(function() {
+            node_to_edit.policies.push($(this).data('policy-id').toString());
+        });
         node_to_edit.name = $('#renamedEffectName').val();;
         node_to_edit.impact = $('#edit-con-impact').val();
         node_to_edit.importance = $('#edit-con-importance').val();
@@ -90,7 +99,8 @@ function draw_tree(treeData){
             action: function(elm, d, i) {
                 console.log('Create child node');
                 create_node_parent = d;                            
-                create_node_modal_active = true;                
+                create_node_modal_active = true;  
+                $('.con-new-policies').html(generatePolicies([], "new-tagged-policy"));              
                 $("#newEffectName").val('');
                 $('#con-comment').val('');
                 $('#con-impact').val('neutral');
@@ -107,6 +117,7 @@ function draw_tree(treeData){
                     $('.cannot-edit').modal('toggle');
                 }else{
                     $('#editModal').modal('toggle');
+                    $('.con-edit-policies').html(generatePolicies(d.policies, "edit-tagged-policy"));
                     $("#renamedEffectName").val(d.name);
                     $('#edit-con-comment').val(d.notes);
                     $('#edit-con-impact').val(d.impact);

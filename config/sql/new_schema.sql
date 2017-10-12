@@ -1,5 +1,3 @@
-CREATE DATABASE  IF NOT EXISTS `fw` /*!40100 DEFAULT CHARACTER SET utf8 */;
-USE `fw`;
 -- MySQL dump 10.13  Distrib 5.7.17, for Win64 (x86_64)
 --
 -- Host: localhost    Database: fw
@@ -16,6 +14,31 @@ USE `fw`;
 /*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
 /*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
+
+--
+-- Table structure for table `conseq_policies`
+--
+
+DROP TABLE IF EXISTS `conseq_policies`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `conseq_policies` (
+  `cid` int(11) DEFAULT NULL,
+  `pid` int(11) DEFAULT NULL,
+  `policyid` varchar(10) DEFAULT NULL,
+  KEY `cid` (`cid`),
+  KEY `pid` (`pid`),
+  KEY `policyid` (`policyid`),
+  CONSTRAINT `conseq_policies_ibfk_1` FOREIGN KEY (`cid`) REFERENCES `consequences` (`cid`),
+  CONSTRAINT `conseq_policies_ibfk_2` FOREIGN KEY (`pid`) REFERENCES `projects` (`pid`),
+  CONSTRAINT `conseq_policies_ibfk_3` FOREIGN KEY (`policyid`) REFERENCES `policies` (`policyid`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `conseq_policies`
+--
+
 
 --
 -- Table structure for table `consequences`
@@ -37,17 +60,14 @@ CREATE TABLE `consequences` (
   PRIMARY KEY (`cid`),
   KEY `pid` (`pid`),
   CONSTRAINT `consequences_ibfk_1` FOREIGN KEY (`pid`) REFERENCES `projects` (`pid`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=26 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=103 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Dumping data for table `consequences`
 --
 
-LOCK TABLES `consequences` WRITE;
-/*!40000 ALTER TABLE `consequences` DISABLE KEYS */;
-/*!40000 ALTER TABLE `consequences` ENABLE KEYS */;
-UNLOCK TABLES;
+
 
 --
 -- Table structure for table `policies`
@@ -90,8 +110,14 @@ CREATE TABLE `projects` (
   PRIMARY KEY (`pid`),
   KEY `powner` (`powner`),
   CONSTRAINT `projects_ibfk_1` FOREIGN KEY (`powner`) REFERENCES `users` (`username`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=20 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `projects`
+--
+
+
 
 --
 -- Table structure for table `users`
@@ -113,6 +139,12 @@ CREATE TABLE `users` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
+-- Dumping data for table `users`
+--
+
+
+
+--
 -- Dumping events for database 'fw'
 --
 
@@ -129,4 +161,4 @@ CREATE TABLE `users` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2017-10-09  2:42:16
+-- Dump completed on 2017-10-12  0:15:09

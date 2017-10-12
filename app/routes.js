@@ -306,22 +306,26 @@ module.exports = function(app, passport) {
 
     //Save futures wheel to database
     app.post('/save_project', function(req, res){
-        console.log('POST data');
         var data = req.body;
-        console.log(data);
-        /**
-         * JSON data received from AJAX call
-         * {
-         *      data: {
-         *          pname: '',
-         *          fw: []
-         *      }
-         * }
-         */
         var pname = data.pname;
         var consequences = data.fw;
         var sql_date = moment.utc().format('YYYY-MM-DD HH:mm:ss');
-        console.log(req.user);        
+        
+        /**
+         * Pseudocode:
+         * Check if the project exists
+         *      If it exists
+         *          1. Delete the existing policies tagged to consequences
+         *          2. Delete the consequences
+         *          3. Insert the new consequences
+         *          4. Retrieve the consequence IDs to insert the policies
+         *          5. Insert the new policies tagged to consequences
+         *      If the project does not exist
+         *          1. Create a new project
+         *          2. Insert the new consequences
+         *          3. Retrieve the consequence IDS to insert the policies
+         *          4. Insert the new policies tagged to consequences
+         */ 
         
         var query = "select * from projects where pname = ? and powner = ?";
         connection.query(query, [data.pname, req.user.username], function(error, rows){
@@ -330,69 +334,131 @@ module.exports = function(app, passport) {
                 throw error;
             }else if(rows.length){
                 console.log('Project already exists');
-                var rowID = rows[0].pid;
-                var values = [];
-                for(var i = 0; i < consequences.length; i++){
-                    var c = consequences[i];
-                    var item = [null, c.name, c.id, c.parentid, c.likelihood, c.impact, c.importance, c.notes, rowID];
-                    values.push(item);
-                }
-                console.log(values);
-                console.log('Figured out entries to be inserted into db');
-                //Delete all the existing entries in consequences table and then insert the new ones.
-                var delete_query = "delete from consequences where pid = " + rowID;
-                connection.query(delete_query, function(error, result){
-                    if(error){
-                        console.error('Error deleting entries in consequences table');
-                        throw error;
+                var rowID = rows[0].pid;                
+                // 1. Delete the existing policies tagged to consequences
+                var delete_policies = "delete from conseq_policies where pid = " + rowID;
+                connection.query(delete_policies, function(error_delete, delete_result){
+                    if(error_delete){
+                        console.log('Error removing old policies');
+                        throw error_delete;
                     }
-                    var insert_conseq_query = "insert into consequences (cid, name, cnodeid, cparentnodeid, likelihood, impact, importance, notes, pid) values ?;";
-                    connection.query(insert_conseq_query, [values], function(err, result){
-                        if(err){
-                            console.error('Error inserting into consequences table - ' + err);
-                            throw err;
+                    var delete_consequences = "delete from consequences where pid = " + rowID;
+                    // 2. Delete the consequences
+                    connection.query(delete_consequences, function(error, result){
+                        if(error){
+                            console.error('Error deleting entries in consequences table');
+                            throw error;
                         }
-                        console.log('No of affected rows - ' + result.affectedRows);
-                        var response = {
-                            pid: rowID,
-                            status: 200,
-                            success: 'Inserted futures wheel into the DB'
+                        var values = [];
+                        for(var i = 0; i < consequences.length; i++){
+                            var c = consequences[i];
+                            var item = [null, c.name, c.id, c.parentid, c.likelihood, c.impact, c.importance, c.notes, rowID];
+                            values.push(item);
                         }
-                        res.end(JSON.stringify(response));
-                    });                    
-                });                
+                        var insert_conseq_query = "insert into consequences (cid, name, cnodeid, cparentnodeid, likelihood, impact, importance, notes, pid) values ?;";
+                        // 3. Insert the new consequences
+                        connection.query(insert_conseq_query, [values], function(err, result){
+                            if(err){
+                                console.error('Error inserting into consequences table - ' + err);
+                                throw err;
+                            }
+                            var insertID = result.insertId;
+                            var select_con_id_query = "select c.cid, c.cnodeid from consequences c where c.pid = " + rowID;
+                            // 4. Retrieve the consequence IDs to insert the policies
+                            connection.query(select_con_id_query, function(error_select, select_rows){
+                                if(error_select){
+                                    console.log('Error selecting consequences');
+                                    throw err;
+                                }
+                                // Construct array to insert the consequences policies
+                                var policy_values = [];
+                                for(var idx = 0; idx < select_rows.length; idx++){
+                                    for(var k = 0; k < consequences.length; k++){
+                                        if(select_rows[idx].cnodeid == consequences[k].id){
+                                            for(var j = 0; j < consequences[k].policies.length; j++){
+                                                if(consequences[k].policies[j] != null || consequences[k].policies[j] != "null")
+                                                    policy_values.push([select_rows[idx].cid, rowID, consequences[k].policies[j].toString()]);
+                                            }
+                                        }                                        
+                                    }
+                                }
+                                var insert_policies_query = "insert into conseq_policies (cid, pid, policyid) values ?;";
+                                // 5. Insert the new policies tagged to consequences
+                                connection.query(insert_policies_query, [policy_values], function(error, rows){
+                                    if(error){
+                                        console.log('Error inserting policies');
+                                        throw error;
+                                    }
+                                    var response = {
+                                        pid: rowID,
+                                        status: 200,
+                                        success: 'Inserted futures wheel into the DB'
+                                    };
+                                    res.end(JSON.stringify(response));
+                                });
+                            });                                                                                      
+                        });                                                                                                                
+                    });
+                });                                
             }else{
                 console.log('Project not found');
-                var project_insert_query = "insert into projects (pid, pname, powner, created_dttm) values (?, ?, ?, ?);"
+                var project_insert_query = "insert into projects (pid, pname, powner, created_dttm) values (?, ?, ?, ?);";
+                // 1. Create a new project
                 connection.query(project_insert_query, [null, pname, req.user.username, sql_date], function(err, result){
                     if(err){
-                        console.error("Error inserting into projects table - " + err);
+                        console.error("Error creating a new project - " + err);
                         throw err; 
                     }
                     var rowID = result.insertId;
-                    console.log("Insert ID - " + rowID);
                     var values = [];
-                    for(var i = 0; i < consequences.length; i++){
+                    for(var i = 0; i < consequences.length; i++){                        
                         var c = consequences[i];
                         var item = [null, c.name, c.id, c.parentid, c.likelihood, c.impact, c.importance, c.notes, rowID];
                         values.push(item);
                     }
-                    console.log(values);
-                    console.log('Figured out entries to be inserted into db');
+                        
                     var insert_conseq_query = "insert into consequences (cid, name, cnodeid, cparentnodeid, likelihood, impact, importance, notes, pid) values ?;";
-                    connection.query(insert_conseq_query, [values], function(err, result){
+                    // 2. Insert the new consequences
+                    connection.query(insert_conseq_query, [values], function(err, resultRow){
                         if(err){
                             console.error('Error inserting into consequences table - ' + err);
                             throw err;
                         }
-                        console.log('No of affected rows - ' + result.affectedRows);
-                        var response = {
-                            pid: rowID,
-                            status: 200,
-                            success: 'Inserted futures wheel into the DB'
-                        }
-                        res.end(JSON.stringify(response));
-                    });                    
+                        var insertID = resultRow.insertId;
+                        var select_con_id_query = "select c.cid, c.cnodeid from consequences c where c.pid = " + rowID;
+                        // 3. Retrieve the consequence IDs to insert the policies
+                        connection.query(select_con_id_query, function(error_select, select_rows){
+                            if(error_select){
+                                console.log('Error selecting consequences');
+                                throw err;
+                            }
+                            // Construct array to insert the consequences policies
+                            var policy_values = [];
+                            for(var idx = 0; idx < select_rows.length; idx++){
+                                for(var k = 0; k < consequences.length; k++){
+                                    if(select_rows[idx].cnodeid == consequences[k].id){
+                                        for(var j = 0; j < consequences[k].policies.length; j++){
+                                            policy_values.push([select_rows[idx].cid, rowID, consequences[k].policies[j].toString()]);
+                                        }
+                                    }                                        
+                                }
+                            }
+                            var insert_policies_query = "insert into conseq_policies (cid, pid, policyid) values ?;";
+                            // 4. Insert the new policies tagged to consequences
+                            connection.query(insert_policies_query, [policy_values], function(error, rows){
+                                if(error){
+                                    console.log('Error inserting policies');
+                                    throw error;
+                                }
+                                var response = {
+                                    pid: rowID,
+                                    status: 200,
+                                    success: 'Inserted futures wheel into the DB'
+                                };
+                                res.end(JSON.stringify(response));
+                            });                            
+                        }); 
+                    });
                 });
             }
         });            
@@ -442,11 +508,12 @@ module.exports = function(app, passport) {
                 }
                 project_name = result[0].pname;
                 if(result[0].powner == req.user.username && result[0].pid == pid){
-                    connection.query("select * from projects p, consequences c where p.pid = " + pid + " and p.pid = c.pid", function(error, rows){
+                    var get_fw_query = "select * from projects p, consequences c, conseq_policies cp where p.pid = " + pid + " and c.pid = p.pid and (cp.cid=c.cid) union select p.*,c.*, c.cid, c.pid, null from projects p, consequences c, conseq_policies cp where p.pid = " + pid + " and c.pid = p.pid and c.cid not in (select cid from conseq_policies);";
+                    connection.query(get_fw_query, function(error, rows){
                         if(error){
                             console.log(error);
                             res.status(500).send('Error retrieving consequences');
-                        }else if(!rows.length){
+                        }else if(!rows.length){                            
                             var response = {
                                 status: 200,
                                 row_length: rows.length,
@@ -455,14 +522,34 @@ module.exports = function(app, passport) {
                             }
                             res.end(JSON.stringify(response));
                         }else{
-                           console.log(rows);
-                           var response = {
-                               status: 200,
-                               row_length: rows.length,
-                               data: rows,
-                               pname: project_name
-                           }
-                           res.end(JSON.stringify(response)); 
+                            var consequences = [];   // This will store the future wheels object to be sent to the frontend
+                            // Construct the tagged policies section for each consequence
+                            for(var i = 0; i < rows.length; i++){
+                                var found = false;
+                                for(var j = 0; j < consequences.length; j++){
+                                    // The condition after && is to ensure that null values dont creep in
+                                    if(rows[i].cid == consequences[j].cid && (rows[i].policyid != null)){
+                                        found = true;
+                                        consequences[j].policies.push(rows[i].policyid);
+                                    }
+                                }
+                                if(found == false){
+                                    rows[i].policies = [];
+                                    if(rows[i].policyid != null){
+                                        rows[i].policies.push(rows[i].policyid);
+                                    }                                        
+                                    delete rows[i].policyid;
+                                    consequences.push(rows[i]);                                    
+                                }
+                            }
+
+                            var response = {
+                                status: 200,
+                                row_length: consequences.length,
+                                data: consequences,
+                                pname: project_name
+                            }
+                            res.end(JSON.stringify(response)); 
                         }
                     });
                 }else{//If the owner is different, meaning shared item

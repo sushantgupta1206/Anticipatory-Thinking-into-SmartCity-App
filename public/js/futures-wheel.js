@@ -1,10 +1,25 @@
 var is_existing_saved = false;
 var project_id = -1;
+var policies = null;
 
 $(document).ready(function(){
     $('#searchInput').prop("disabled", true);
     $('#search-con-button').prop("disabled", true);
-    $('#search-policy-button').prop("disabled", true);    
+    $('#search-policy-button').prop("disabled", true);
+
+    $.ajax({
+        'url': '/view_policies',
+        'type': 'POST',
+        'contentType': 'application/json',
+        success: function(response){
+            response = JSON.parse(response);
+            console.log(response);
+            policies = response.data;
+        },
+        error: function(request, status, error){                
+            displayToastMessage('Error encountered retrieving policies');
+        }
+    });
 
     $("#CreateNodeForm").on('click', function () {
         var impact = $('#con-impact').val();
@@ -285,6 +300,7 @@ function copyArray(source){
         obj.root_ind = item.root_ind || 0;
         obj.notes = item.notes || '';
         obj.parentid = item.parent ? item.parent.id : 0;
+        obj.policies = item.policies;
         result.push(obj);
     }
     console.log('modified array');
@@ -404,3 +420,12 @@ function delete_project(){
     }
 }
 
+function generatePolicies(selected, policyClass){ //policyClass will be used to differentiate between create new and edit modal
+    var i;
+    var html = "";
+    html += "<label>Tag Policies</label><br/>";
+    for(i = 0; i < policies.length; i++){
+        html += "<input type='checkbox' class='" + policyClass + "' name='policy' data-policy-id='" + policies[i].policyid + "'" + ((selected.indexOf(policies[i].policyid) >= 0) ? "checked>" : ">") + policies[i].policy_name + "<br/>";
+    }
+    return html;
+}

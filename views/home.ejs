@@ -35,11 +35,11 @@
                     <div class="proj-exists-message"></div>
                     <div class="form-group">
                         <label for="project-name">Project Name</label>
-                        <input type="text" name="project-name" class="form-control" id="newProjectName" placeholder="Project Name" required>                        
+                        <input type="text" name="project-name" maxlength="50" class="form-control" id="newProjectName" placeholder="Project Name" required>                        
                     </div>
                     <div class="form-group">
                         <label for="root-node-name">Change, Event or Decision</label>
-                        <input type="text" name="root-node-name" class="form-control" id="rootNodeName" placeholder="Main change, event or decision to be explored" required>                        
+                        <input type="text" name="root-node-name" class="form-control" id="rootNodeName" maxlength="30" placeholder="Main change, event or decision to be explored" required>                        
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -82,23 +82,13 @@
                 </div>
                 <div class="modal-body">
                     <div class="form-group form-group-con-type-disable">
-                        <input type="text" class="form-control" id="newEffectName" placeholder="Consequence Name">                        
+                        <input type="text" class="form-control" id="newEffectName" placeholder="Consequence Name" maxlength="30">                        
                     </div>                                          
-                    <div class="policies">
-                        <label>Tag Policies</label>
-                        <label class="checkbox cb-margin">
-                            <input type = "checkbox" name="policy">Policy One
-                        </label>
-                        <label class="checkbox cb-margin">
-                            <input type = "checkbox" name="policy">Policy Two
-                        </label>
-                        <label class="checkbox cb-margin">
-                            <input type = "checkbox" name="policy">Policy Three
-                        </label>
+                    <div class="con-new-policies">                        
                     </div>                    
                     <div class="form-group">
                         <label for="comment">Notes:</label>
-                        <textarea class="form-control" rows="5" id="con-comment"></textarea>
+                        <textarea class="form-control" rows="5" id="con-comment" maxlength="250"></textarea>
                     </div>
                     <div class="input-group fw-ig">
                         <span class="input-group-addon">Impact:</span>
@@ -150,23 +140,13 @@
                 </div>
                 <div class="modal-body">
                     <div class="form-group form-group-con-type-disable">
-                        <input type="text" class="form-control" id="renamedEffectName" placeholder="Consequence">                        
+                        <input type="text" class="form-control" id="renamedEffectName" placeholder="Consequence" maxlength="30">                        
                     </div>
-                    <div class="policies">
-                        <label>Tag Policies</label>
-                        <label class="checkbox cb-margin">
-                            <input type = "checkbox" name="policy">Policy One
-                        </label>
-                        <label class="checkbox cb-margin">
-                            <input type = "checkbox" name="policy">Policy Two
-                        </label>
-                        <label class="checkbox cb-margin">
-                            <input type = "checkbox" name="policy">Policy Three
-                        </label>
+                    <div class="con-edit-policies">                        
                     </div>                    
                     <div class="form-group">
                         <label for="comment">Notes:</label>
-                        <textarea class="form-control" rows="5" id="edit-con-comment"></textarea>
+                        <textarea class="form-control" rows="5" id="edit-con-comment" maxlength="250"></textarea>
                     </div>
                     <div class="input-group fw-ig">
                         <span class="input-group-addon">Impact:</span>
