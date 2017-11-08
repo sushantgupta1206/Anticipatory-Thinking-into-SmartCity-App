@@ -1,6 +1,7 @@
 var is_existing_saved = false;
 var project_id = -1;
 var policies = null;
+var policy_map = {};
 
 $(document).ready(function(){
     $('#searchInput').prop("disabled", true);
@@ -15,6 +16,10 @@ $(document).ready(function(){
             response = JSON.parse(response);
             console.log(response);
             policies = response.data;
+            for(var i = 0; i < policies.length; i++){
+                policy_map[policies[i].policyid] = policies[i].policy_name;
+            }
+            console.log(policy_map);
         },
         error: function(request, status, error){                
             displayToastMessage('Error encountered retrieving policies');
@@ -264,7 +269,81 @@ $(document).ready(function(){
             'timeout': 5000//timeout of the ajax call
         });
     });
+
+    $('#fw-export-project').on('click', function(){
+        /* This is to save as an image, but there is problems rendering the css correctly
+        var fw_svg = document.getElementsByClassName('overlay')[0];
+        var canvas = document.getElementById('canvas');
+        var ctx = canvas.getContext('2d');
+        var data = (new XMLSerializer()).serializeToString(fw_svg);
+        var DOMURL = window.URL || window.webkitURL || window;
+      
+        var img = new Image();
+        var svgBlob = new Blob([data], {type: 'image/svg+xml;charset=utf-8'});
+        var url = DOMURL.createObjectURL(svgBlob);
+      
+        img.onload = function () {
+            ctx.drawImage(img, 0, 0);
+            DOMURL.revokeObjectURL(url);
+
+            var imgURI = canvas
+                .toDataURL('image/png')
+                .replace('image/png', 'image/octet-stream');
+            
+            triggerDownload(imgURI);
+        };      
+        img.src = url; 
+        */
+        var pptx = new PptxGenJS();
+        var consequencesArr = copyArray(tree_nodes);
+        console.log(consequencesArr.length);
+        var slide = pptx.addNewSlide();
+        slide.addText(
+            consequencesArr[0].name,
+            { x: 0.0, y: 0.25, w: '100%', h: 1.5, align: 'c', font_size: 24, color: '0088CC', fill: 'F1F1F1' }
+        );
+        for(var i = 1; i < consequencesArr.length; i++){
+            var slide = pptx.addNewSlide();
+            slide.addText(
+                consequencesArr[i].name,
+                { x:0.0, y:0.25, w:'100%', h:1.0, align:'c', font_size:24, color:'0088CC', fill:'F1F1F1' }
+            );
+            slide.addText("Related Description", { x:1.0, y:1.5, w:'100%', h:0.38, color:'0088CC' });
+            var related_text = "";
+            related_text += ("Impact : " + consequencesArr[i].impact + "\n");
+            related_text += ("Importance : " + consequencesArr[i].importance + "\n");
+            related_text += ("Notes : " + ((consequencesArr[i].notes.length) ? consequencesArr[i].notes : "Not Applicable") + "\n");
+            var related_policies = [];
+            for(var k = 0; k < consequencesArr[i].policies.length; k++){
+                related_policies.push(policy_map[consequencesArr[i].policies[k]]);
+            }
+            related_text += ("Policies : " + related_policies + "\n");
+
+            slide.addText(
+                related_text,
+                { x:1.0, y:2.0, w:'100%', h:1, color:'393939', font_size:16, bullet:true }
+            );
+        }     
+        pptx.save('Demo-Simple');             
+    });
 });
+
+function triggerDownload (imgURI) {
+    var evt = new MouseEvent('click', {
+      view: window,
+      bubbles: false,
+      cancelable: true
+    });
+
+    
+    var a = document.createElement('a');
+    a.setAttribute('download', project_name + '.png');
+    a.setAttribute('href', imgURI);
+    a.setAttribute('target', '_blank');  
+    a.dispatchEvent(evt);
+    //document.body.removeChild(a);
+  }
+
 
 function attachEvents(){
     $('.fw-proj-table-row').on('click', function(){
@@ -406,8 +485,8 @@ function save_project(){
                     $('#createProjectModal').modal('toggle');
                 }
                 is_existing_saved = false;
-                tree_root = null;
-                tree_nodes = null;
+                // tree_root = null;
+                // tree_nodes = null;
             },
             'error': function(request, status, error){
                 displayToastMessage('Project could not be saved.');

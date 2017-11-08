@@ -87,7 +87,7 @@ module.exports = function(app, passport) {
         console.log('Username: ' + username);
         console.log('Token: ' + token);
         console.log('Status - ' + bcrypt.compareSync(username, token));
-        var get_query = "select * from fw.user_verification where username = '" + username + "';";
+        var get_query = "select * from think_db.user_verification where username = '" + username + "';";
         connection.query(get_query, function(error, result){
             if(error){
                 console.log('Internal server error - ' + error)
@@ -105,7 +105,7 @@ module.exports = function(app, passport) {
                     console.log('Difference - ' + (date.getTime() - created_date.getTime()));
                     var time_diff = (date.getTime() - created_date.getTime());
                     if(time_diff <= SECS_IN_DAY){
-                        var update_query = "update fw.users set verified_ind = 1 where username = '" + username + "';";
+                        var update_query = "update think_db.users set verified_ind = 1 where username = '" + username + "';";
                         console.log("Update Query - " + update_query);
                         connection.query(update_query, function(err, result) {
                             if(err){
@@ -255,7 +255,7 @@ module.exports = function(app, passport) {
         }
         if(bcrypt.compareSync(email, token)){
             console.log('Tokens are good');
-            var update_query = "update fw.users set password = '" + bcrypt.hashSync(pwd, null, null) + "' where email = '" + email + "';";
+            var update_query = "update think_db.users set password = '" + bcrypt.hashSync(pwd, null, null) + "' where email = '" + email + "';";
             //console.log(update_query);
             connection.query(update_query, function(err, result){
                 if(err){
@@ -382,20 +382,23 @@ module.exports = function(app, passport) {
                                         }                                        
                                     }
                                 }
-                                var insert_policies_query = "insert into conseq_policies (cid, pid, policyid) values ?;";
-                                // 5. Insert the new policies tagged to consequences
-                                connection.query(insert_policies_query, [policy_values], function(error, rows){
-                                    if(error){
-                                        console.log('Error inserting policies');
-                                        throw error;
-                                    }
-                                    var response = {
-                                        pid: rowID,
-                                        status: 200,
-                                        success: 'Inserted futures wheel into the DB'
-                                    };
-                                    res.end(JSON.stringify(response));
-                                });
+                                console.log(policy_values);
+                                if(policy_values.length > 0){
+                                    var insert_policies_query = "insert into conseq_policies (cid, pid, policyid) values ?;";
+                                    // 5. Insert the new policies tagged to consequences
+                                    connection.query(insert_policies_query, [policy_values], function(error, rows){
+                                        if(error){
+                                            console.log('Error inserting policies');
+                                            throw error;
+                                        }
+                                        var response = {
+                                            pid: rowID,
+                                            status: 200,
+                                            success: 'Inserted futures wheel into the DB'
+                                        };
+                                        res.end(JSON.stringify(response));
+                                    });
+                                }                                
                             });                                                                                      
                         });                                                                                                                
                     });

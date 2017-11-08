@@ -106,7 +106,7 @@ CREATE TABLE `projects` (
   `pid` int(11) NOT NULL AUTO_INCREMENT,
   `pname` varchar(50) NOT NULL,
   `powner` varchar(20) DEFAULT NULL,
-  `created_dttm` datetime DEFAULT CURRENT_TIMESTAMP,
+  `created_dttm` datetime DEFAULT '2015-05-11 13:01:01',
   PRIMARY KEY (`pid`),
   KEY `powner` (`powner`),
   CONSTRAINT `projects_ibfk_1` FOREIGN KEY (`powner`) REFERENCES `users` (`username`) ON DELETE CASCADE
