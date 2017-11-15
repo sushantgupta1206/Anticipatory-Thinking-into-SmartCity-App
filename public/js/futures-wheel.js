@@ -571,3 +571,31 @@ function generatePolicies(selected, policyClass){ //policyClass will be used to 
     }
     return html;
 }
+
+var autoSaveFunction = setInterval(function(){
+    console.log('Auto-Save function called');
+    console.log(tree_nodes);
+    if(tree_root !== null){
+        $.ajax({
+            'url': '/save_project',
+            'type': 'POST',
+            'contentType': 'application/json',
+            'data': JSON.stringify({
+                'pname': project_name,
+                'fw': copyArray(tree_nodes)
+                }),
+            'success': function (response) {
+                console.log(response);
+                console.log('Project saved successfully');                
+            },
+            'error': function(request, status, error){
+                console.log('Project could not be saved.');                
+            },
+            'timeout': 5000//timeout of the ajax call
+        });
+    }else{
+        console.log('Nothing to save in auto-save');
+    }    
+}, 20000);
+
+//clearInterval(autoSaveFunction);
