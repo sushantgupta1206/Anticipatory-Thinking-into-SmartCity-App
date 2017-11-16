@@ -398,7 +398,14 @@ module.exports = function(app, passport) {
                                         };
                                         res.end(JSON.stringify(response));
                                     });
-                                }                                
+                                }else{
+                                    var response = {
+                                        pid: rowID,
+                                        status: 200,
+                                        success: 'Inserted futures wheel into the DB'
+                                    };
+                                    res.end(JSON.stringify(response));
+                                }                              
                             });                                                                                      
                         });                                                                                                                
                     });
@@ -446,20 +453,29 @@ module.exports = function(app, passport) {
                                     }                                        
                                 }
                             }
-                            var insert_policies_query = "insert into conseq_policies (cid, pid, policyid) values ?;";
-                            // 4. Insert the new policies tagged to consequences
-                            connection.query(insert_policies_query, [policy_values], function(error, rows){
-                                if(error){
-                                    console.log('Error inserting policies');
-                                    throw error;
-                                }
+                            if(policy_values.length > 0){
+                                var insert_policies_query = "insert into conseq_policies (cid, pid, policyid) values ?;";
+                                // 4. Insert the new policies tagged to consequences
+                                connection.query(insert_policies_query, [policy_values], function(error, rows){
+                                    if(error){
+                                        console.log('Error inserting policies');
+                                        throw error;
+                                    }
+                                    var response = {
+                                        pid: rowID,
+                                        status: 200,
+                                        success: 'Inserted futures wheel into the DB'
+                                    };
+                                    res.end(JSON.stringify(response));
+                                });
+                            }else{
                                 var response = {
                                     pid: rowID,
                                     status: 200,
                                     success: 'Inserted futures wheel into the DB'
                                 };
                                 res.end(JSON.stringify(response));
-                            });                            
+                            }                                                        
                         }); 
                     });
                 });
@@ -575,16 +591,23 @@ module.exports = function(app, passport) {
                 res.status(500).send('Project not found or only project owner can delete the project');
             }else{
                 pid = rows[0].pid;
-                console.log('Going to delete project');
-                connection.query('delete from projects where pid = ' + pid, function(error, result){
+                console.log('Going to delete tagged policies first');
+                connection.query('delete from conseq_policies where pid = ' + pid, function(error, del_res){
                     if(error){
                         console.log(error);
-                        res.status(500).send('Error deleting project');
-                    }else{
-                        console.log('Number of affected rows - ' + result.affectedRows);
-                        res.status(200).send('Project successfully deleted');
+                        res.status(500).send('Error deleting project - tagged policies');
                     }
-                });
+                    console.log('Going to delete project');
+                    connection.query('delete from projects where pid = ' + pid, function(error, result){
+                        if(error){
+                            console.log(error);
+                            res.status(500).send('Error deleting project');
+                        }else{
+                            console.log('Number of affected rows - ' + result.affectedRows);
+                            res.status(200).send('Project successfully deleted');
+                        }
+                    });
+                });              
             }
         });
     });

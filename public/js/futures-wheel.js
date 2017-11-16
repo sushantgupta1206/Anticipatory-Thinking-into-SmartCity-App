@@ -113,7 +113,7 @@ $(document).ready(function(){
             //  3. Toggle the modal to create new project
             $('.project-exists').modal('toggle');            
         }else{
-            $('#createProjectModal').modal('toggle');
+            $('.create-project-modal').modal('toggle');
         }            
     });
 
@@ -144,11 +144,11 @@ $(document).ready(function(){
                         draw_tree(tree_root);
                         $('#searchInput').prop("disabled", false);
                         $('#search-con-button').prop("disabled", false);
-                        $('#search-policy-button').prop("disabled", false);
-                        $('#createProjectModal').modal('toggle');
+                        $('#search-policy-button').prop("disabled", false);                        
+                        $('.create-project-modal').modal('toggle');
                     }
                 }else if(response.status == 200 && !response.isAvailable){
-                    displayToastMessage('Project with same name already exists');
+                    displayToastMessage('Project with same name already exists. Please choose another name for your new project.');
                 }//Toast message displayed for already existing projects
             },
             error: function(request, status, error){                
@@ -223,6 +223,7 @@ $(document).ready(function(){
 
     $('#discardExistingProject').on('click', function(){
         discard_project();
+        $('.create-project-modal').modal('toggle');
     });
 
     $('#fw-delete-project').on('click', function(){
@@ -324,7 +325,45 @@ $(document).ready(function(){
                 { x:1.0, y:2.0, w:'100%', h:1, color:'393939', font_size:16, bullet:true }
             );
         }     
-        pptx.save('Demo-Simple');             
+        pptx.save(project_name);
+    });
+
+    $('#fw-logout').on('click', function(){
+        if(tree_root == null){
+            window.location.href = "/logout";
+        }else{
+            $('.save-project-before-logout').modal('toggle');
+        }
+    });
+
+    $('#discardProjectLogout').on('click', function(){
+        discard_project();
+        window.location.href = "/logout";
+    });
+
+    $('#saveProjectLogout').on('click', function(){
+        if(tree_root !== null){
+            $.ajax({
+                'url': '/save_project',
+                'type': 'POST',
+                'contentType': 'application/json',
+                'data': JSON.stringify({
+                    'pname': project_name,
+                    'fw': copyArray(tree_nodes)
+                    }),
+                'success': function (response) {
+                    console.log(response);
+                    console.log('Project saved successfully'); 
+                    window.location.href = "/logout";
+                },
+                'error': function(request, status, error){
+                    displayToastMessage('Project could not be saved.');                
+                },
+                'timeout': 5000//timeout of the ajax call
+            });
+        }else{
+            console.log('Nothing to save in auto-save');
+        }
     });
 });
 
@@ -482,7 +521,7 @@ function save_project(){
                 if(is_existing_saved){
                     $('.project-exists').modal('toggle');
                     $('.overlay').remove();
-                    $('#createProjectModal').modal('toggle');
+                    $('.create-project-modal').modal('toggle');
                 }
                 is_existing_saved = false;
                 // tree_root = null;
@@ -596,6 +635,6 @@ var autoSaveFunction = setInterval(function(){
     }else{
         console.log('Nothing to save in auto-save');
     }    
-}, 20000);
+}, 60000);
 
 //clearInterval(autoSaveFunction);

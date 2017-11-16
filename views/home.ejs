@@ -25,7 +25,7 @@
 </head>
 <body>
     <!-- Create new project -->
-    <div class='modal fade' role='dialog' id='createProjectModal'>
+    <div class='modal fade create-project-modal' role='dialog'>
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
@@ -224,6 +224,26 @@
         </div>
     </div>
 
+    <div class="modal fade save-project-before-logout" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title">What do you want to do?</h4>
+                </div>                
+                <div class="modal-body">
+                    <p>A project already exists in the application workflow. Do you want to go ahead and save it before logging out or just discard your changes?.</p>
+                </div>
+                <div class="modal-footer">
+                    <button id='discardProjectLogout' type="button" class="btn btn-primary" data-dismiss='modal'>Discard</button>                    
+                    <button id='saveProjectLogout' type="button" class="btn btn-primary">Save</button>
+                </div>
+            </div>
+            <!-- /.modal-content -->
+        </div>
+        <!-- /.modal-dialog -->
+    </div>
+
     <div class="modal fade view-policy" tabindex="-1" role="dialog">
         <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
@@ -286,7 +306,7 @@
                             <span class="glyphicon glyphicon-user glyphicon-margin"></span>Manage account Information</a>
                         <a href="javascript:void(0)" class="list-group-item">
                             <span class="glyphicon glyphicon-question-sign glyphicon-margin"></span>View FAQ/Help Page</a>
-                        <a href="/logout" class="list-group-item">
+                        <a href="javascript:void(0)" id="fw-logout" class="list-group-item">
                             <span class="glyphicon glyphicon-log-out glyphicon-margin"></span>Logout</a>
                     </div>
                 </div>
