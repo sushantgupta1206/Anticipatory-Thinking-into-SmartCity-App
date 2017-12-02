@@ -9,6 +9,7 @@ var tree_root = null;
 var outer_update = null;
 var outer_click = null;
 var tree_nodes = null;
+var found_count = 0;
 
 var create_node_parent = null;
 var node_to_edit = null;
@@ -54,51 +55,131 @@ function create_node(type){
     outer_update(create_node_parent);
 }
 
-function search_node(obj,search, path){
-    console.log("We have to search: " + search);
-    console.log("root value: " + obj);
-    console.log("current path value: " + path);
-    if(obj.name.includes(search)){
-    //if(obj.name === search){ //if search is found return, add the object to the path and return it
-        console.log("compare successfull");
-        path.push(obj);
-        console.log("path value to return: " + path);
-        // for(var i =0; i< obj.children.length; i++){
-        // search_node(obj.children,search,path);
-        // }
-        return path;
+function searchTree(d,searchText) {
+    console.log("code in search tree");
+    var searchField = "d.name";
+    console.log("searchField: " + d.name);
+    if (d.children){
+        d.children.forEach(function(dr){
+            searchTree(dr,searchText);
+        })
     }
-    else if(obj.children || obj._children){ //if children are collapsed d3 object will have them instantiated as _children
-        var children = (obj.children) ? obj.children : obj._children;
-        for(var i=0;i<children.length;i++){
-            path.push(obj);// we assume this path is the right one
-            var found = search_node(children[i],search,path);
-            console.log("path contains: " + found);
-            if(found){// we were right, this should return the bubbled-up path from the first if statement
-                return found;
+        else if (d._children){
+    d._children.forEach(function(dr){
+        searchTree(dr,searchText);
+    })
+}
+    var searchFieldValue = eval(searchField);
+    console.log("Search text: " + searchText);
+    console.log("searchFieldValue: " + searchFieldValue);
+    if (searchFieldValue && searchFieldValue.includes(searchText)) {
+        console.log("if condition passed");    
+        // Walk parent chain
+            var ancestors = [];
+            var parent = d;
+            while (typeof(parent) !== "undefined") {
+                ancestors.push(parent);
+		console.log("parent: " + parent);
+                parent.class = "found";
+                parent = parent.parent;
             }
-            else{//we were wrong, remove this parent from the path and continue iterating
-                path.pop();
-            }
-        }
-    }
-    else{//not the right object, return false so it will continue to iterate in the loop
-        return false;
+        //return ancestors; 
+            console.log("ancestors: " + ancestors);
     }
 }
 
-function openPaths(paths){
-    for(var i =0;i<paths.length;i++){
-        if(paths[i].id !== "1"){//i.e. not root
-            paths[i].class = 'found';
-            if(paths[i]._children){ //if children are hidden: open them, otherwise: don't do anything
-                paths[i].children = paths[i]._children;
-                paths[i]._children = null;
-            }
-            outer_update(paths[i]);
-        }
+function collapseAllNotFound(d) {
+    console.log("code in collapse all");
+    if (d.children) {
+    	if (d.class !== "found") {
+        	d._children = d.children;
+        	d._children.forEach(collapseAllNotFound);
+        	d.children = null;
+	} else 
+        	d.children.forEach(collapseAllNotFound);
     }
 }
+
+// function search_node(obj,search, path){
+//     console.log("We have to search: " + search);
+//     console.log("root value: " + obj);
+//     console.log("current path value: " + path);
+//     if(obj.name.includes(search)){
+//     //if(obj.name === search){ //if search is found return, add the object to the path and return it
+//         console.log("compare successfull");
+//         path.push(obj);
+//         console.log("path value to return: " + path);
+//         // for(var i =0; i< obj.children.length; i++){
+//         // search_node(obj.children,search,path);
+//         // }
+//         return path;
+//     }
+//     else if(obj.children || obj._children){ //if children are collapsed d3 object will have them instantiated as _children
+//         var children = (obj.children) ? obj.children : obj._children;
+//         for(var i=0;i<children.length;i++){
+//             path.push(obj);// we assume this path is the right one
+//             var found = search_node(children[i],search,path);
+//             console.log("path contains: " + found);
+//             if(found){// we were right, this should return the bubbled-up path from the first if statement
+//                 return found;
+//             }
+//             else{//we were wrong, remove this parent from the path and continue iterating
+//                 path.pop();
+//             }
+//         }
+//     }
+//     else{//not the right object, return false so it will continue to iterate in the loop
+//         return false;
+//     }
+// }
+
+// function openPaths(paths){
+//     for(var i =0;i<paths.length;i++){
+//         if(paths[i].id !== "1"){//i.e. not root
+//             paths[i].class = 'found';
+//             if(paths[i]._children){ //if children are hidden: open them, otherwise: don't do anything
+//                 paths[i].children = paths[i]._children;
+//                 paths[i]._children = null;
+//             }
+//             outer_update(paths[i]);
+//         }
+//     }
+// }
+
+
+// function search_policy(obj,search, path){
+//     console.log("We have to search: " + search);
+//     console.log("root value: " + obj);
+//     console.log("current path value: " + path);
+//     if(obj.policies.includes(search)){
+//     //if(obj.name === search){ //if search is found return, add the object to the path and return it
+//         console.log("compare successfull");
+//         path.push(obj);
+//         console.log("path value to return: " + path);
+//         // for(var i =0; i< obj.children.length; i++){
+//         // search_node(obj.children,search,path);
+//         // }
+//         return path;
+//     }
+//     else if(obj.children || obj._children){ //if children are collapsed d3 object will have them instantiated as _children
+//         var children = (obj.children) ? obj.children : obj._children;
+//         for(var i=0;i<children.length;i++){
+//             path.push(obj);// we assume this path is the right one
+//             var found = search_policy(children[i],search,path);
+//             console.log("path contains: " + found);
+//             if(found){// we were right, this should return the bubbled-up path from the first if statement
+//                 return found;
+//             }
+//             else{//we were wrong, remove this parent from the path and continue iterating
+//                 path.pop();
+//             }
+//         }
+//     }
+//     else{//not the right object, return false so it will continue to iterate in the loop
+//         return false;
+//     }
+// }
+
 
 function edit_node(){
     if(node_to_edit && edit_modal_active){

@@ -50,20 +50,80 @@ $(document).ready(function(){
         //console.log(tree_root.children[1].likelihood);
         //console.log(tree_root.children);
         
-        var paths = search_node(tree_root,search,[]);
-        console.log("got paths " + paths);
-        //
-        if(typeof(paths) !== "undefined" && paths !== false && paths !== undefined){
-            console.log("inside if of paths");
-            openPaths(paths);
-		}
-		else{
-            //alert(e.object.text+" not found!");
-            alert(search + "is not found in this tree!");
-		}
-        // search_node(search);
-        return false;
+        searchTree(tree_root,search);
+        outer_update(tree_root);
+        
+        // console.log("got paths: " + paths);
+        // //
+        // if(typeof(paths) !== "undefined" && paths !== false && paths !== undefined){
+        //     console.log("inside if of paths");
+        //     openPaths(paths);
+        //     tree_root.children.forEach(collapseAllNotFound);
+		// }
+		// else{
+        //     //alert(e.object.text+" not found!");
+        //     alert(search + "is not found in this tree!");
+		// }
+        // // search_node(search);
+        // return false;
     });
+
+
+
+    // $("#search-con-button").on('click', function () {
+    //     console.log("hi in search");
+	// 	var search = $('#searchInput').val();
+	// 	console.log("Searching for" + search);
+    //     console.log(tree_root.name);
+    //     console.log("value to pass to function: "+ tree_root.name);
+    //     //console.log(tree_root.children);
+    //     //console.log(tree_root.children[0]);
+    //     //console.log(tree_root.children[1].name);
+    //     //console.log(tree_root.children[1].likelihood);
+    //     //console.log(tree_root.children);
+        
+    //     var paths = search_node(tree_root,search,[]);
+    //     console.log("got paths " + paths);
+    //     //
+    //     if(typeof(paths) !== "undefined" && paths !== false && paths !== undefined){
+    //         console.log("inside if of paths");
+    //         openPaths(paths);
+	// 	}
+	// 	else{
+    //         //alert(e.object.text+" not found!");
+    //         alert(search + "is not found in this tree!");
+	// 	}
+    //     // search_node(search);
+    //     return false;
+    // });
+
+    // $("#search-policy-button").on('click', function () {
+    //     console.log("hi in search policy");
+	// 	var searchPolicy = $('#searchInput').val();
+	// 	console.log("Searching for" + searchPolicy);
+    //     console.log(tree_root.name);
+    //     console.log("tree policies: " + tree_root.policies);
+    //     console.log("value to pass to function: "+ tree_root);
+    //     console.log(tree_root.children);
+    //     console.log("This is the first child" + tree_root.children[0]);
+    //     console.log("name of 2nd child" + tree_root.children[1].name);
+    //     console.log(tree_root.children[1].policies);
+    //     //console.log(tree_root.children);
+        
+    //     var paths = search_policy(tree_root.children,searchPolicy,[]);
+    //     console.log("got paths " + paths);
+    //     //
+    //     if(typeof(paths) !== "undefined" && paths !== false && paths !== undefined){
+    //         console.log("inside if of paths");
+    //         openPaths(paths);
+	// 	}
+	// 	else{
+    //         //alert(e.object.text+" not found!");
+    //         alert(searchPolicy + "is not found in this tree!");
+	// 	}
+    //     // search_node(search);
+    //     return false;
+    // });
 
     //function searchTree(obj,search,path){
         // 		if(obj.name === search){ //if search is found return, add the object to the path and return it
@@ -105,7 +165,8 @@ $(document).ready(function(){
         // 		.attr("class", "tooltip")
         // 		.style("opacity", 0);
 
-    $('#fw-create-new').on('click', function(){
+    
+        $('#fw-create-new').on('click', function(){
         if(tree_root){
             //TODO - If a project is already in progress. Decide what needs to be done!   
             //  1. Ask the user if he wants to save or discard
@@ -204,7 +265,10 @@ $(document).ready(function(){
                        '<label class="control-label">&nbsp;Click any row to open corresponding project</label></div>';
                     
                     $('.saved-projects').html(html);
-                    $('.open-project').modal('toggle');
+                    $('.open-project').modal('toggle');$('#search-con-button').prop("disabled", false);
+                    $('#searchInput').prop("disabled", false);
+                    $('#search-con-button').prop("disabled", false);
+                    $('#search-policy-button').prop("disabled", false);
                     attachEvents();
                 }
             },
