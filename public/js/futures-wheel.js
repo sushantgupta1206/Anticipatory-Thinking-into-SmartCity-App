@@ -3,6 +3,7 @@ var project_id = -1;
 var policies = null;
 var policy_map = {};
 
+
 $(document).ready(function(){
     $('#searchInput').prop("disabled", true);
     $('#search-con-button').prop("disabled", true);
@@ -42,7 +43,9 @@ $(document).ready(function(){
 
     $("#search-con-button").on('click', function () {
         console.log("hi in search");
-		var search = $('#searchInput').val();
+        clearAll(tree_root);
+        expandAll(tree_root);
+        var search = $('#searchInput').val();
 		console.log("Searching for" + search);
         console.log(tree_root.name);
         console.log("value to pass to function: "+ tree_root.name);
@@ -51,50 +54,21 @@ $(document).ready(function(){
         //console.log(tree_root.children[1].name);
         //console.log(tree_root.children[1].likelihood);
         //console.log(tree_root.children);
-        
+        //var present = 0;
         searchTree(tree_root,search);
+        //console.log("updated flag : " + present);
+        //if(present === 0 || presemt == 0 || present == '0') {
+        //    console.log("present value : " + present);
+        //    alert("Search item not found please try again");
+        //}
+        tree_root.children.forEach(collapseAllNotFound);
         outer_update(tree_root);
+        console.log("search flag value :" + consFlag);
+        if(consFlag === 0){
+            alert("Search item not found please try again");
+        }
     });    
-        // console.log("got paths: " + paths);
-        // //
-        // if(typeof(paths) !== "undefined" && paths !== false && paths !== undefined){
-        //     console.log("inside if of paths");
-        //     openPaths(paths);
-        //     tree_root.children.forEach(collapseAllNotFound);
-		// }
-		// else{
-        //     //alert(e.object.text+" not found!");
-        //     alert(search + "is not found in this tree!");
-		// }
-        // // search_node(search);
-        // return false;
-    
-
-
-
-    // $("#search-con-button").on('click', function () {
-    //     console.log("hi in search");
-	// 	var search = $('#searchInput').val();
-	// 	console.log("Searching for" + search);
-    //     console.log(tree_root.name);
-    //     console.log("value to pass to function: "+ tree_root.name);
-    //     //console.log(tree_root.children);
-    //     //console.log(tree_root.children[0]);
-    //     //console.log(tree_root.children[1].name);
-    //     //console.log(tree_root.children[1].likelihood);
-    //     //console.log(tree_root.children);
         
-    //     var paths = search_node(tree_root,search,[]);
-    //     console.log("got paths " + paths);
-    //     //
-    //     if(typeof(paths) !== "undefined" && paths !== false && paths !== undefined){
-    //         console.log("inside if of paths");
-    //         openPaths(paths);
-	// 	}
-	// 	else{
-    //         //alert(e.object.text+" not found!");
-    //         alert(search + "is not found in this tree!");
-	// 	}
     //     // search_node(search);
     //     return false;
     // });
@@ -102,6 +76,7 @@ $(document).ready(function(){
     $("#search-policy-button").on('click', function () {
        console.log("hi in search policy");
        clearAll(tree_root);
+       expandAll(tree_root);
        var searchPolicy = $('#searchInput').val();
        console.log("Searching for" + searchPolicy);
        console.log(" root name: " + tree_root.name);
@@ -124,7 +99,12 @@ $(document).ready(function(){
       }
       console.log("keys: " + keys);
       searchTreePolicy(tree_root, keys);
+      console.log("for collapse all : " + tree_root.children)
+      tree_root.children.forEach(collapseAllNotFound);
       outer_update(tree_root);
+      if(policyFlag === 0){
+        alert("Search item not found in policy list please try again");
+    }
        //console.log("tree policies: " + tree_root.policies);
 //     console.log("value to pass to function: "+ tree_root);
 //     console.log(tree_root.children);

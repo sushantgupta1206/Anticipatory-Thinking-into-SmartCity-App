@@ -17,6 +17,8 @@ var create_node_modal_active = false;
 var edit_modal_active = false
 var i = 0;
 var project_name = null;
+var consFlag = 0;
+var policyFlag = 0;
 
 function create_node(type){            
     if(create_node_parent && create_node_modal_active){
@@ -74,7 +76,10 @@ function searchTree(d,searchText) {
     var searchFieldValue = eval(searchField);
     console.log("Search text: " + searchText);
     console.log("searchFieldValue: " + searchFieldValue);
+    
     if (searchFieldValue && searchFieldValue.includes(searchText)) {
+        consFlag++;
+        //console.log("flag value: " + flag);
         console.log("if condition passed");    
         // Walk parent chain
             var ancestors = [];
@@ -93,6 +98,7 @@ function searchTree(d,searchText) {
 function collapseAllNotFound(d) {
     console.log("code in collapse all");
     if (d.children) {
+        console.log("class of d.class" + d.class);
     	if (d.class !== "found") {
         	d._children = d.children;
         	d._children.forEach(collapseAllNotFound);
@@ -100,6 +106,15 @@ function collapseAllNotFound(d) {
 	} else 
         	d.children.forEach(collapseAllNotFound);
     }
+}
+
+function expandAll(d) {
+    if (d._children) {
+        d.children = d._children;
+        d.children.forEach(expandAll);
+        d._children = null;
+    } else if (d.children)
+        d.children.forEach(expandAll);
 }
 
 function clearAll(d) {
@@ -133,6 +148,7 @@ function searchTreePolicy(d,searchKeys) {
         //alert(array[i]);
         console.log(" value of i: " + searchKeys[i]);
         if (searchFieldValue && searchFieldValue.includes(searchKeys[i])) {
+            policyFlag++;
             console.log("if condition passed");    
             // Walk parent chain
                 var ancestors = [];
@@ -147,7 +163,7 @@ function searchTreePolicy(d,searchKeys) {
                 console.log("ancestors: " + ancestors);
         }
       }   
-}
+    }
 
 
 
