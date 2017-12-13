@@ -55,6 +55,8 @@ function create_node(type){
     outer_update(create_node_parent);
 }
 
+
+
 function searchTree(d,searchText) {
     console.log("code in search tree");
     var searchField = "d.name";
@@ -99,6 +101,55 @@ function collapseAllNotFound(d) {
         	d.children.forEach(collapseAllNotFound);
     }
 }
+
+function clearAll(d) {
+    console.log("inside clearAll");
+    d.class = "";
+    if (d.children)
+        d.children.forEach(clearAll);
+    else if (d._children)
+        d._children.forEach(clearAll);
+}
+
+function searchTreePolicy(d,searchKeys) {
+    console.log("Keys to be searched: " + searchKeys);
+    console.log("code in search tree policy ");
+    var searchField = "d.policies";
+    console.log("searchField: " + d.policies);
+    if (d.children){
+        d.children.forEach(function(dr){
+            searchTreePolicy(dr,searchKeys);
+        })
+    }
+        else if (d._children){
+    d._children.forEach(function(dr){
+        searchTreePolicy(dr,searchKeys);
+    })
+}
+    var searchFieldValue = eval(searchField);
+    console.log("Search text: " + searchKeys);
+    console.log("searchFieldValue: " + searchFieldValue);
+    for (var i in searchKeys) {
+        //alert(array[i]);
+        console.log(" value of i: " + searchKeys[i]);
+        if (searchFieldValue && searchFieldValue.includes(searchKeys[i])) {
+            console.log("if condition passed");    
+            // Walk parent chain
+                var ancestors = [];
+                var parent = d;
+                while (typeof(parent) !== "undefined") {
+                    ancestors.push(parent);
+                    console.log("parent: " + parent);
+                    parent.class = "found";
+                    parent = parent.parent;
+                }
+            //return ancestors; 
+                console.log("ancestors: " + ancestors);
+        }
+      }   
+}
+
+
 
 // function search_node(obj,search, path){
 //     console.log("We have to search: " + search);

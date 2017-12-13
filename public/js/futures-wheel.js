@@ -14,11 +14,13 @@ $(document).ready(function(){
         'contentType': 'application/json',
         success: function(response){
             response = JSON.parse(response);
+            //console.log("::::::::::::::::::::::::::::::::::::Printing response: ");
             console.log(response);
             policies = response.data;
             for(var i = 0; i < policies.length; i++){
                 policy_map[policies[i].policyid] = policies[i].policy_name;
             }
+            console.log("Hi this is policy map");
             console.log(policy_map);
         },
         error: function(request, status, error){                
@@ -52,7 +54,7 @@ $(document).ready(function(){
         
         searchTree(tree_root,search);
         outer_update(tree_root);
-        
+    });    
         // console.log("got paths: " + paths);
         // //
         // if(typeof(paths) !== "undefined" && paths !== false && paths !== undefined){
@@ -66,7 +68,7 @@ $(document).ready(function(){
 		// }
         // // search_node(search);
         // return false;
-    });
+    
 
 
 
@@ -97,33 +99,56 @@ $(document).ready(function(){
     //     return false;
     // });
 
-    // $("#search-policy-button").on('click', function () {
-    //     console.log("hi in search policy");
-	// 	var searchPolicy = $('#searchInput').val();
-	// 	console.log("Searching for" + searchPolicy);
-    //     console.log(tree_root.name);
-    //     console.log("tree policies: " + tree_root.policies);
-    //     console.log("value to pass to function: "+ tree_root);
-    //     console.log(tree_root.children);
-    //     console.log("This is the first child" + tree_root.children[0]);
-    //     console.log("name of 2nd child" + tree_root.children[1].name);
-    //     console.log(tree_root.children[1].policies);
-    //     //console.log(tree_root.children);
+    $("#search-policy-button").on('click', function () {
+       console.log("hi in search policy");
+       clearAll(tree_root);
+       var searchPolicy = $('#searchInput').val();
+       console.log("Searching for" + searchPolicy);
+       console.log(" root name: " + tree_root.name);
+       console.log(" tree_root policies : " + tree_root.policies);
+       // searchTreePolicy(d,searchText)
+       console.log("Policy map to search in: ");
+       console.log(policy_map);
+       var keys = [];
+       for(var key in policy_map) {
+           console.log("Inside for loop");
+        var value = policy_map[key].toLowerCase();
+        //console.log(" Key value pair is: " + key + " " + value);
         
-    //     var paths = search_policy(tree_root.children,searchPolicy,[]);
-    //     console.log("got paths " + paths);
-    //     //
-    //     if(typeof(paths) !== "undefined" && paths !== false && paths !== undefined){
-    //         console.log("inside if of paths");
-    //         openPaths(paths);
-	// 	}
-	// 	else{
-    //         //alert(e.object.text+" not found!");
-    //         alert(searchPolicy + "is not found in this tree!");
-	// 	}
-    //     // search_node(search);
-    //     return false;
-    // });
+        if(value && value.includes(searchPolicy.toLowerCase())){
+            console.log("Including key : " + key);
+            keys.push(key);
+        }
+        // do something with "key" and "value" variables
+       
+      }
+      console.log("keys: " + keys);
+      searchTreePolicy(tree_root, keys);
+      outer_update(tree_root);
+       //console.log("tree policies: " + tree_root.policies);
+//     console.log("value to pass to function: "+ tree_root);
+//     console.log(tree_root.children);
+//     console.log("This is the first child" + tree_root.children[0]);
+//     console.log("name of 2nd child" + tree_root.children[1].name);
+        console.log("policy of child 1: " + tree_root.children[0].policies);
+//     //console.log(tree_root.children);
+    
+//     var paths = search_policy(tree_root.children,searchPolicy,[]);
+//     console.log("got paths " + paths);
+//     //
+//     if(typeof(paths) !== "undefined" && paths !== false && paths !== undefined){
+//         console.log("inside if of paths");
+//         openPaths(paths);
+// 	}
+// 	else{
+//         //alert(e.object.text+" not found!");
+//         alert(searchPolicy + "is not found in this tree!");
+// 	}
+//     // search_node(search);
+//     return false;
+});
+
+
 
     //function searchTree(obj,search,path){
         // 		if(obj.name === search){ //if search is found return, add the object to the path and return it
