@@ -65,7 +65,7 @@ $(document).ready(function(){
         outer_update(tree_root);
         console.log("search flag value :" + consFlag);
         if(consFlag === 0){
-            alert("Search item not found please try again");
+            displayToastMessage("Search item not found please try again");
         }
     });    
         
@@ -103,7 +103,7 @@ $(document).ready(function(){
       tree_root.children.forEach(collapseAllNotFound);
       outer_update(tree_root);
       if(policyFlag === 0){
-        alert("Search item not found in policy list please try again");
+        displayToastMessage("Search item not found in policy list please try again");
     }
        //console.log("tree policies: " + tree_root.policies);
 //     console.log("value to pass to function: "+ tree_root);
