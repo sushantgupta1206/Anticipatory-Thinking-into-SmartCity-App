@@ -40,7 +40,7 @@
                     </div>
                     <div class="form-group">
                         <label for="root-node-name">Change, Event or Decision</label>
-                        <input type="text" name="root-node-name" class="form-control" id="rootNodeName" maxlength="30" placeholder="Main change, event or decision to be explored" required>                        
+                        <input type="text" name="root-node-name" class="form-control" id="rootNodeName" maxlength="100" placeholder="Main change, event or decision to be explored" required>                        
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -83,7 +83,7 @@
                 </div>
                 <div class="modal-body">
                     <div class="form-group form-group-con-type-disable">
-                        <input type="text" class="form-control" id="newEffectName" placeholder="Consequence Name" maxlength="30">                        
+                        <input type="text" class="form-control" id="newEffectName" placeholder="Consequence Name" maxlength="100">                        
                     </div>                                          
                     <div class="con-new-policies">                        
                     </div>                    
@@ -141,7 +141,7 @@
                 </div>
                 <div class="modal-body">
                     <div class="form-group form-group-con-type-disable">
-                        <input type="text" class="form-control" id="renamedEffectName" placeholder="Consequence" maxlength="30">                        
+                        <input type="text" class="form-control" id="renamedEffectName" placeholder="Consequence" maxlength="100">                        
                     </div>
                     <div class="con-edit-policies">                        
                     </div>                    
@@ -302,9 +302,9 @@
                     <div class="list-group">
                         <a href="javascript:void(0)" class="list-group-item">
                             <span class="glyphicon glyphicon-cog glyphicon-margin"></span>Manage app settings</a>
-                        <a href="javascript:void(0)" class="list-group-item">
-                            <span class="glyphicon glyphicon-user glyphicon-margin"></span>Manage account Information</a>
-                        <a href="javascript:void(0)" class="list-group-item">
+                        <a href="/delete_account" id="fw-delete-account" class="list-group-item">
+                            <span class="glyphicon glyphicon-user glyphicon-margin"></span>Delete account Information</a>
+                        <a href="/faq" class="list-group-item" target="_blank">
                             <span class="glyphicon glyphicon-question-sign glyphicon-margin"></span>View FAQ/Help Page</a>
                         <a href="javascript:void(0)" id="fw-logout" class="list-group-item">
                             <span class="glyphicon glyphicon-log-out glyphicon-margin"></span>Logout</a>

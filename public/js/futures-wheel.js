@@ -258,7 +258,7 @@ $(document).ready(function(){
                         var pname = response.result[i].pname;
                         var owner = response.result[i].name;
                         var pdate = new Date(response.result[i].created_dttm);
-                        var dateStr = (pdate.getMonth() + 1) + '/' + pdate.getDay() + '/' + pdate.getFullYear();
+                        var dateStr = (pdate.getMonth() + 1) + '/' + pdate.getDate() + '/' + pdate.getFullYear();
                         html += '<tr class="fw-proj-table-row" data-pid=' + pid + '>' +
                                     '<td>' + pname + '</td>' + 
                                     '<td>' + owner + '</td>' + 
@@ -299,6 +299,10 @@ $(document).ready(function(){
         delete_project();
     });
 
+    $('#fw-delete-account').on('click', function(){
+        window.location.href = "/delete_account";
+    });
+    
     $("#fw-view-policies").on('click', function(){
         $.ajax({
             'url': '/view_policies',
