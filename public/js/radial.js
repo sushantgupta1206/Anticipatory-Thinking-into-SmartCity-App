@@ -1,10 +1,3 @@
-// {/* <style>
-// .found {
-// 		fill: #ff4136;
-// 		stroke: #ff4136;
-// 	}
-//     </style> */}
-
 var tree_root = null;
 var outer_update = null;
 var outer_click = null;
@@ -299,6 +292,7 @@ function draw_tree(treeData){
             title: 'Create new consequence',
             action: function(elm, d, i) {
                 console.log('Create child node');
+                $('#createNewModal').modal({backdrop: 'static', keyboard: false, show: true});
                 create_node_parent = d;                            
                 create_node_modal_active = true;  
                 $('.con-new-policies').html(generatePolicies([], "new-tagged-policy"));              
@@ -317,7 +311,8 @@ function draw_tree(treeData){
                 if(d.root_ind){
                     $('.cannot-edit').modal('toggle');
                 }else{
-                    $('#editModal').modal('toggle');
+                    $('#editModal').modal({backdrop: 'static', keyboard: false, show: true});
+                    //$('#editModal').modal('toggle');
                     $('.con-edit-policies').html(generatePolicies(d.policies, "edit-tagged-policy"));
                     $("#renamedEffectName").val(d.name);
                     $('#edit-con-comment').val(d.notes);
