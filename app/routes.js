@@ -619,11 +619,10 @@ module.exports = function(app, passport) {
 
     app.post('/view_policies', function(req, res){
         console.log('View policies request');
-        connection.query("select * from policies", function(err, result){
+        connection.query("select * from policies where powner='" + req.user.username + "'", function(err, result){
             if(err){
                 res.status(500).send('Failed to retrieve policies');                
             }else{
-                console.log(result);
                 var response = {
                     status: 200,
                     data: result,
@@ -672,6 +671,36 @@ module.exports = function(app, passport) {
                         });
                     }
                 });                
+            }
+        });
+    });
+
+    app.post('/add_policy', function(req, res){
+        console.log('Adding policy section');
+        var username = req.user.username;
+        console.log(req.body);
+        var data = req.body;
+        console.log(data.pid);
+        console.log(username);
+        connection.query("select * from policies where policyid='" + data.pid + "' and powner='" + username + "'", function(error, resp){
+            if(error){
+                res.status(500).send("Failed to add policy");
+            }else if(resp.length){
+                res.status(500).send('Policy with same identifier already exists');
+            }else{
+                console.log('Inside');
+                connection.query('insert into policies(policyid, policy_name, policy_category, policy_desc, powner) values (?,?,?,?,?)', [data.pid, data.pname, data.pcat, data.pdesc, username], function(error, result){
+                    if(error){
+                        console.log(error);
+                        res.status(500).send("Failed to add policy");
+                    }else{
+                        var response = {
+                            status: 200                            
+                        }
+                        console.log('Policy added successfully');
+                        res.end(JSON.stringify(response));
+                    }
+                });
             }
         });
     });

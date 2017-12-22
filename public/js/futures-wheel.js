@@ -302,7 +302,93 @@ $(document).ready(function(){
     $('#fw-delete-account').on('click', function(){
         window.location.href = "/delete_account";
     });
-    
+
+    $('#fw-add-policies').on('click', function(){
+        var pid = $('#newPolicyIdentifier').val('');
+        var pname = $('#newPolicyName').val('');
+        var pcat = $('#newPolicyCategory').val('');
+        var pdesc = $('#policy-desc').val('');
+        $('.error-msg').html('');
+        $('#addPolicyModal').modal({backdrop: 'static', keyboard: false, show: true});
+    });
+
+    $('#CreatePolicy').on('click', function(){
+        var pid = $('#newPolicyIdentifier').val();
+        var pname = $('#newPolicyName').val();
+        var pcat = $('#newPolicyCategory').val();
+        var pdesc = $('#policy-desc').val();
+
+        var i, code;
+        for(i = 0; i < pid.length; i++){
+            code = pid.charCodeAt(i);
+            if(!isAlphaNumeric(pid.charAt(i)) && !isWhiteSpace(pid.charAt(i)) && code !== 46 || pid.length < 3 || pid.length > 10){
+                $('.error-msg').html(generateAlertMessage('Invalid identifier format. Should contain only numbers and letters of length 3-10 characters.'));
+                $('#newPolicyIdentifier').focus();
+                return false;
+            }
+        }
+
+        for(i = 0; i < pname.length; i++){
+            code = pname.charCodeAt(i);
+            if(!isAlphaNumeric(pname.charAt(i)) && !isWhiteSpace(pname.charAt(i)) || pname.length < 3 || pname.length > 50){
+                $('.error-msg').html(generateAlertMessage('Invalid policy name format. Should contain only numbers and letters of length 3-50 characters.'));
+                $('#newPolicyName').focus();
+                return false;
+            }
+        }
+
+        for(i = 0; i < pcat.length; i++){
+            code = pcat.charCodeAt(i);
+            if(!isAlphaNumeric(pcat.charAt(i)) && !isWhiteSpace(pcat.charAt(i)) || pcat.length < 3 || pcat.length > 50){
+                $('.error-msg').html(generateAlertMessage('Invalid policy category format. Should contain only numbers and letters of length 3-50 characters.'));
+                $('#newPolicyCategory').focus();
+                return false;
+            }
+        }
+
+        for(i = 0; i < pdesc.length; i++){
+            code = pdesc.charCodeAt(i);
+            if(!isAlphaNumeric(pdesc.charAt(i)) && !isWhiteSpace(pdesc.charAt(i)) && code !== 44 && code !== 45 && code!== 46 || pdesc.length < 10 || pdesc.length > 500){
+                $('.error-msg').html(generateAlertMessage('Invalid policy description format. Should contain only numbers, letters and (.,-) of length 10-500 characters.'));
+                $('#policy-desc').focus();
+                return false;
+            }
+        }
+
+        $.ajax({
+            'url': '/add_policy',
+            'type': 'POST',
+            'contentType': 'application/json',
+            'data': JSON.stringify({                
+                'pid': pid,
+                'pname': pname,
+                'pcat': pcat,
+                'pdesc': pdesc                
+            }),
+            'success': function(response){
+                console.log('Policy added successfully');
+                $('#addPolicyModal').modal('toggle');
+                policies.push({
+                    'policyid': pid,
+                    'policy_name': pname,
+                    'policy_category': pcat,
+                    'policy_desc': pdesc
+                });
+                console.log(policies);
+                policy_map[pid] = pname;
+                console.log(policy_map);
+            },
+            'error': function(request, status, error){
+                if(request.responseText === 'Policy with same identifier already exists'){
+                    displayToastMessage('Policy with the same identifier already exists.');
+                }else{
+                    displayToastMessage('There was an error adding the policy');
+                }                
+            },
+            'timeout': 5000//timeout of the ajax call
+        });
+    });
+
     $("#fw-view-policies").on('click', function(){
         $.ajax({
             'url': '/view_policies',
@@ -320,6 +406,7 @@ $(document).ready(function(){
                 '</tr>' +
                 '</thead>' +
                 '<tbody>';
+                policies = response.data;
                 for(var i = 0; i < response.data.length; i++){
                     var pid = response.data[i].policyid;
                     var pname = response.data[i].policy_name;
@@ -425,7 +512,9 @@ $(document).ready(function(){
                     'fw': copyArray(tree_nodes)
                     }),
                 'success': function (response) {
+                    response = JSON.parse(response);
                     console.log(response);
+                    project_id = response.pid;
                     console.log('Project saved successfully'); 
                     window.location.href = "/logout";
                 },
@@ -440,22 +529,35 @@ $(document).ready(function(){
     });
 });
 
-function triggerDownload (imgURI) {
+function triggerDownload(imgURI) {
     var evt = new MouseEvent('click', {
-      view: window,
-      bubbles: false,
-      cancelable: true
+        view: window,
+        bubbles: false,
+        cancelable: true
     });
 
-    
+
     var a = document.createElement('a');
     a.setAttribute('download', project_name + '.png');
     a.setAttribute('href', imgURI);
-    a.setAttribute('target', '_blank');  
+    a.setAttribute('target', '_blank');
     a.dispatchEvent(evt);
     //document.body.removeChild(a);
-  }
+}
 
+function isAlphaNumeric(str) {
+    var code = str.charCodeAt(0);
+    if (!(code > 47 && code < 58) && // numeric (0-9)
+        !(code > 64 && code < 91) && // upper alpha (A-Z)
+        !(code > 96 && code < 123)) { // lower alpha (a-z)
+        return false;
+    }    
+    return true;
+};
+
+function isWhiteSpace(s) {
+    return /\s/g.test(s);
+}
 
 function attachEvents(){
     $('.fw-proj-table-row').on('click', function(){
@@ -589,7 +691,9 @@ function save_project(){
                 'fw': copyArray(tree_nodes)
                 }),
             'success': function (response) {
+                response = JSON.parse(response);
                 console.log(response);
+                project_id = response.pid;
                 displayToastMessage('Project saved successfully');
                 if(is_existing_saved){
                     $('.project-exists').modal('toggle');
@@ -697,7 +801,9 @@ var autoSaveFunction = setInterval(function(){
                 'fw': copyArray(tree_nodes)
                 }),
             'success': function (response) {
+                response = JSON.parse(response);
                 console.log(response);
+                project_id = response.pid;
                 console.log('Project saved successfully');                
             },
             'error': function(request, status, error){
@@ -709,5 +815,12 @@ var autoSaveFunction = setInterval(function(){
         console.log('Nothing to save in auto-save');
     }    
 }, 60000);
+
+function generateAlertMessage(msg){
+    var html = '<div class="alert alert-danger alert-dismissable fw-alert">' +
+					'<a href="#" class="close" data-dismiss="alert" aria-label="close">×</a>' + 
+					msg + '</div>';
+	return html;
+}
 
 //clearInterval(autoSaveFunction);
