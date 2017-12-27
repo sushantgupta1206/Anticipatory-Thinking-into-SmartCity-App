@@ -1,10 +1,3 @@
-// {/* <style>
-// .found {
-// 		fill: #ff4136;
-// 		stroke: #ff4136;
-// 	}
-//     </style> */}
-
 var tree_root = null;
 var outer_update = null;
 var outer_click = null;
@@ -20,7 +13,15 @@ var project_name = null;
 var consFlag = 0;
 var policyFlag = 0;
 
-function create_node(type){            
+var ELM = null;
+var D = null;
+var I = null;
+var create1 = {};
+var source1 = null;
+function create_node(type, undoManager){ 
+    console.log("code inside create node");
+    console.log("value of type: " + type);
+    console.log("value of undoManager: " + undoManager);
     if(create_node_parent && create_node_modal_active){
         if(create_node_parent._children != null){
             create_node_parent.children =create_node_parent._children;
@@ -48,13 +49,72 @@ function create_node(type){
             'children': [],
             '_children': null
         }
-        console.log('Create Node name: ' + name);
+        console.log('Create Node name: ' + new_node);
         create_node_parent.children.push(new_node);
+        console.log("create_node_parent.children: "  + create_node_parent.children);
         create_node_modal_active = false;
         $('#newEffectName').val('');        
         $('#createNewModal').modal('toggle');
+        undoManager.add({
+            undo: function () {
+                console.log("time to delete node");
+                console.log("value of type: " + new_node);
+                outer_delete_node(new_node);
+            }
+            // redo: function () {
+            //     console.log("inside redo function");
+            //     create_node(type, undoManager);
+            // }
+        });
     }
+    console.log("contents of create node parent :" + create_node_parent);
     outer_update(create_node_parent);
+    
+}
+
+function create_node_again(create, undoManager){ 
+    console.log("code inside create node again ");
+    console.log("value of create node: " + create);
+    console.log("value of node name: " + create.name);
+    
+    console.log("value of undoManager: " + undoManager);
+    console.log("create_node_parent: " + create_node_parent);
+    if(create_node_parent){
+        console.log("Code inside 1st if condition");
+        if(create_node_parent._children != null){
+            console.log("code inside 2nd if statement");
+            create_node_parent.children =create_node_parent._children;
+            create_node_parent._children = null;
+        }
+        if(create_node_parent.children == null){
+            console.log("Code inside 3 rd if condition");
+            create_node_parent.children = [];
+        }
+        var id = ++i;        
+        name = create.name;
+        var selected_policies = create.policies;
+        console.log("selected policies" + selected_policies);
+        var new_node = {
+            'name': name,
+            'likelihood': create.likelihood,
+            'notes': create.notes,
+            'importance': create.importance,
+            'policies': selected_policies,
+            'id': id,
+            'impact': create.impact,
+            'depth':create.depth,
+            'children': [],
+            '_children': null
+        }
+        create1 = new_node;
+        console.log("create1 : " + create1);
+        console.log('Create Node name: ' + name);
+        create_node_parent.children.push(new_node);
+        
+    }
+    console.log("the value for outerupdate is : " + create1);
+    outer_update(create_node_parent);
+    
 }
 
 
@@ -162,90 +222,8 @@ function searchTreePolicy(d,searchKeys) {
             //return ancestors; 
                 console.log("ancestors: " + ancestors);
         }
-      }   
-    }
-
-
-
-// function search_node(obj,search, path){
-//     console.log("We have to search: " + search);
-//     console.log("root value: " + obj);
-//     console.log("current path value: " + path);
-//     if(obj.name.includes(search)){
-//     //if(obj.name === search){ //if search is found return, add the object to the path and return it
-//         console.log("compare successfull");
-//         path.push(obj);
-//         console.log("path value to return: " + path);
-//         // for(var i =0; i< obj.children.length; i++){
-//         // search_node(obj.children,search,path);
-//         // }
-//         return path;
-//     }
-//     else if(obj.children || obj._children){ //if children are collapsed d3 object will have them instantiated as _children
-//         var children = (obj.children) ? obj.children : obj._children;
-//         for(var i=0;i<children.length;i++){
-//             path.push(obj);// we assume this path is the right one
-//             var found = search_node(children[i],search,path);
-//             console.log("path contains: " + found);
-//             if(found){// we were right, this should return the bubbled-up path from the first if statement
-//                 return found;
-//             }
-//             else{//we were wrong, remove this parent from the path and continue iterating
-//                 path.pop();
-//             }
-//         }
-//     }
-//     else{//not the right object, return false so it will continue to iterate in the loop
-//         return false;
-//     }
-// }
-
-// function openPaths(paths){
-//     for(var i =0;i<paths.length;i++){
-//         if(paths[i].id !== "1"){//i.e. not root
-//             paths[i].class = 'found';
-//             if(paths[i]._children){ //if children are hidden: open them, otherwise: don't do anything
-//                 paths[i].children = paths[i]._children;
-//                 paths[i]._children = null;
-//             }
-//             outer_update(paths[i]);
-//         }
-//     }
-// }
-
-
-// function search_policy(obj,search, path){
-//     console.log("We have to search: " + search);
-//     console.log("root value: " + obj);
-//     console.log("current path value: " + path);
-//     if(obj.policies.includes(search)){
-//     //if(obj.name === search){ //if search is found return, add the object to the path and return it
-//         console.log("compare successfull");
-//         path.push(obj);
-//         console.log("path value to return: " + path);
-//         // for(var i =0; i< obj.children.length; i++){
-//         // search_node(obj.children,search,path);
-//         // }
-//         return path;
-//     }
-//     else if(obj.children || obj._children){ //if children are collapsed d3 object will have them instantiated as _children
-//         var children = (obj.children) ? obj.children : obj._children;
-//         for(var i=0;i<children.length;i++){
-//             path.push(obj);// we assume this path is the right one
-//             var found = search_policy(children[i],search,path);
-//             console.log("path contains: " + found);
-//             if(found){// we were right, this should return the bubbled-up path from the first if statement
-//                 return found;
-//             }
-//             else{//we were wrong, remove this parent from the path and continue iterating
-//                 path.pop();
-//             }
-//         }
-//     }
-//     else{//not the right object, return false so it will continue to iterate in the loop
-//         return false;
-//     }
-// }
+    }   
+}
 
 
 function edit_node(){
@@ -274,7 +252,10 @@ function edit_node(){
     }, 1000);    
 }
 
-function draw_tree(treeData){
+function draw_tree(treeData, undoManager){
+    console.log("value of treedata :" + treeData);
+    console.log("value of undoManager :" + undoManager);
+    
     // Calculate total nodes, max label length
     var totalNodes = 0;
     var maxLabelLength = 0;
@@ -293,12 +274,26 @@ function draw_tree(treeData){
     var height = $('.right-panel').height() - 10;
 
     var diameter = 800;
-
+    
+    function creation(ELM, D, I, undoManager){
+        console.log('Inside creation function Create child node');
+        console.log("value of ELM: " + ELM );
+        console.log("value of D: " + D);
+        console.log("value of I: " + I);
+        create_node_parent = D.parent; //D.parent.name                            
+        //create_node_modal_active = true; 
+        console.log("reaches here"); 
+        create_node_again(D, undoManager);
+        //outer_update();
+    }
     var menu = [
         {
             title: 'Create new consequence',
-            action: function(elm, d, i) {
+            action: function(elm, d, i, undoManager) {
                 console.log('Create child node');
+                console.log("value of elm: " + elm );
+                console.log("value of d: " + d);
+                console.log("value of i: " + i);
                 create_node_parent = d;                            
                 create_node_modal_active = true;  
                 $('.con-new-policies').html(generatePolicies([], "new-tagged-policy"));              
@@ -341,12 +336,16 @@ function draw_tree(treeData){
         },
         {
             title: 'Delete consequence',
-            action: function(elm, d, i) {
+            action: function(elm, d, i, undoManager) {
                 console.log('Delete node');
+                ELM = elm;
+                D = d;
+                I = i;
                 if(d.root_ind){
                     $('.cannot-edit').modal('toggle');
                 }else{
                     delete_node(d);
+                    
                 }
             }
         }                
@@ -356,7 +355,7 @@ function draw_tree(treeData){
         {
             title: 'Create new consequence',
             action: function(elm, d, i) {
-                console.log('Create child node');
+                console.log('Create child node1');
                 create_node_parent = d;                            
                 create_node_modal_active = true;
                 $('#CreateNodeName').focus();
@@ -412,6 +411,8 @@ function draw_tree(treeData){
     });
 
     function delete_node(node) {
+        console.log("In delete node");
+        console.log("Value of node recievec: " + node);
         visit(treeData, function (d) {
             if (d.children) {
                 for (var child of d.children) {
@@ -426,7 +427,21 @@ function draw_tree(treeData){
             function (d) {
                 return d.children && d.children.length > 0 ? d.children : null;
             });
-    }
+        undoManager.add({
+                undo: function () {
+                    console.log("time to add node after delete");
+                    console.log("value of node: " + node);
+                    //draw_tree(node);
+                    creation(ELM, D,I, undoManager);
+                    //create_node_again(D, undoManager)
+                }
+                // redo: function () {
+                //     console.log("inside redo function");
+                //     outer_delete_node(d);
+                // }
+            });
+    
+        }
 
     // sort the tree according to the node names
     function sortTree() {
@@ -704,15 +719,19 @@ function draw_tree(treeData){
     }
 
     function update(source) {
+        source1 = source;
+        console.log("source value is: " + source1);
         // Compute the new height, function counts total children of root node and sets tree height accordingly.
         // This prevents the layout looking squashed when new nodes are made visible or looking sparse when nodes are removed
         // This makes the layout more consistent.
-
+        console.log("code in update after undo");
         var levelWidth = [1];
         var childCount = function (level, n) {
             if (n.children && n.children.length > 0) {
-                if (levelWidth.length <= level + 1) levelWidth.push(0);
-
+                console.log("code enters  1st if");
+                if (levelWidth.length <= level + 1) {levelWidth.push(0);
+                console.log("code enters  2nd if");
+                }
                 levelWidth[level + 1] += n.children.length;
                 n.children.forEach(function (d) {
                     childCount(level + 1, d);
@@ -911,6 +930,7 @@ function draw_tree(treeData){
         });
 
         tree_nodes = nodes;
+        console.log("The current tree_node is : " + tree_nodes);
     }
 
     // Append a group which holds all nodes and which the zoom Listener can act upon.
@@ -920,10 +940,11 @@ function draw_tree(treeData){
     // root.children.forEach(function (child) {
     //     collapse(child);
     // });
-
+    outer_creation = creation;
     outer_update = update;
     outer_click = click;
     outer_toggle = toggleChildren;
+    outer_delete_node = delete_node;
     // Layout the tree initially and center on the root node.
     update(root);
     tree_root = root;    

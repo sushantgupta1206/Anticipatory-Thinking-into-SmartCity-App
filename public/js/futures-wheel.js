@@ -1,14 +1,17 @@
+
 var is_existing_saved = false;
 var project_id = -1;
 var policies = null;
 var policy_map = {};
-
+var btnUndo;
+//var btnRedo;
+var undoManager = new UndoManager();
 
 $(document).ready(function(){
     $('#searchInput').prop("disabled", true);
     $('#search-con-button').prop("disabled", true);
     $('#search-policy-button').prop("disabled", true);
-
+    
     $.ajax({
         'url': '/view_policies',
         'type': 'POST',
@@ -32,7 +35,7 @@ $(document).ready(function(){
     $("#CreateNodeForm").on('click', function () {
         var impact = $('#con-impact').val();
         console.log("Consequence type - " + impact);
-        create_node(impact);
+        create_node(impact, undoManager);
         return false;
     });
 
@@ -40,6 +43,34 @@ $(document).ready(function(){
         edit_node();
         return false;
     });
+
+    
+    btnUndo = $('#fw-undo-action');
+    //btnRedo = $('#fw-redo-action');
+    
+    function updateUI() {
+        btnUndo.disabled = !undoManager.hasUndo();
+        //btnRedo.disabled = !undoManager.hasRedo();
+    }
+
+    undoManager.setCallback(updateUI);
+    
+    $('#fw-undo-action').on('click', function(e){
+        //e.preventDefault();
+        console.log("in Undo operation");
+        undoManager.undo();
+        updateUI();
+        //undo_function();        
+    });
+
+
+    // $('#fw-redo-action').on('click', function(e){
+    //     //e.preventDefault();
+    //     console.log("in redo operation");
+    //     undoManager.redo();
+    //     updateUI();
+    //     //undo_function();        
+    // });
 
     $("#search-con-button").on('click', function () {
         console.log("hi in search");
@@ -49,18 +80,7 @@ $(document).ready(function(){
 		console.log("Searching for" + search);
         console.log(tree_root.name);
         console.log("value to pass to function: "+ tree_root.name);
-        //console.log(tree_root.children);
-        //console.log(tree_root.children[0]);
-        //console.log(tree_root.children[1].name);
-        //console.log(tree_root.children[1].likelihood);
-        //console.log(tree_root.children);
-        //var present = 0;
         searchTree(tree_root,search);
-        //console.log("updated flag : " + present);
-        //if(present === 0 || presemt == 0 || present == '0') {
-        //    console.log("present value : " + present);
-        //    alert("Search item not found please try again");
-        //}
         tree_root.children.forEach(collapseAllNotFound);
         outer_update(tree_root);
         console.log("search flag value :" + consFlag);
@@ -69,10 +89,7 @@ $(document).ready(function(){
         }
     });    
         
-    //     // search_node(search);
-    //     return false;
-    // });
-
+    
     $("#search-policy-button").on('click', function () {
        console.log("hi in search policy");
        clearAll(tree_root);
@@ -105,73 +122,14 @@ $(document).ready(function(){
       if(policyFlag === 0){
         displayToastMessage("Search item not found in policy list please try again");
     }
-       //console.log("tree policies: " + tree_root.policies);
-//     console.log("value to pass to function: "+ tree_root);
-//     console.log(tree_root.children);
-//     console.log("This is the first child" + tree_root.children[0]);
-//     console.log("name of 2nd child" + tree_root.children[1].name);
         console.log("policy of child 1: " + tree_root.children[0].policies);
-//     //console.log(tree_root.children);
-    
-//     var paths = search_policy(tree_root.children,searchPolicy,[]);
-//     console.log("got paths " + paths);
-//     //
-//     if(typeof(paths) !== "undefined" && paths !== false && paths !== undefined){
-//         console.log("inside if of paths");
-//         openPaths(paths);
-// 	}
-// 	else{
-//         //alert(e.object.text+" not found!");
-//         alert(searchPolicy + "is not found in this tree!");
-// 	}
-//     // search_node(search);
-//     return false;
 });
 
 
 
-    //function searchTree(obj,search,path){
-        // 		if(obj.name === search){ //if search is found return, add the object to the path and return it
-        // 			path.push(obj);
-        // 			return path;
-        // 		}
-        // 		else if(obj.children || obj._children){ //if children are collapsed d3 object will have them instantiated as _children
-        // 			var children = (obj.children) ? obj.children : obj._children;
-        // 			for(var i=0;i<children.length;i++){
-        // 				path.push(obj);// we assume this path is the right one
-        // 				var found = searchTree(children[i],search,path);
-        // 				if(found){// we were right, this should return the bubbled-up path from the first if statement
-        // 					return found;
-        // 				}
-        // 				else{//we were wrong, remove this parent from the path and continue iterating
-        // 					path.pop();
-        // 				}
-        // 			}
-        // 		}
-        // 		else{//not the right object, return false so it will continue to iterate in the loop
-        // 			return false;
-        // 		}
-        // 	}
-        
-        // 	function extract_select2_data(node,leaves,index){
-        // 	        if (node.children){
-        // 	            for(var i = 0;i<node.children.length;i++){
-        // 	                index = extract_select2_data(node.children[i],leaves,index)[0];
-        // 	            }
-        // 	        }
-        // 	        else {
-        // 	            leaves.push({id:++index,text:node.name});
-        // 	        }
-        // 	        return [index,leaves];
-        // 	}
-        
-        // 	var div = d3.select("body")
-        // 		.append("div") // declare the tooltip div
-        // 		.attr("class", "tooltip")
-        // 		.style("opacity", 0);
-
     
-        $('#fw-create-new').on('click', function(){
+    
+    $('#fw-create-new').on('click', function(){
         if(tree_root){
             //TODO - If a project is already in progress. Decide what needs to be done!   
             //  1. Ask the user if he wants to save or discard
@@ -207,7 +165,7 @@ $(document).ready(function(){
                             'policies': [],
                             'importance': 'high'
                         };
-                        draw_tree(tree_root);
+                        draw_tree(tree_root, undoManager);
                         $('#searchInput').prop("disabled", false);
                         $('#search-con-button').prop("disabled", false);
                         $('#search-policy-button').prop("disabled", false);                        
@@ -296,6 +254,7 @@ $(document).ready(function(){
     });
 
     $('#fw-delete-project').on('click', function(){
+        var deletion = delete_project();
         delete_project();
     });
 
@@ -495,7 +454,7 @@ function attachEvents(){
                         }
                         project_name = response.pname;
                         project_id = pid;
-                        draw_tree(tree_root);
+                        draw_tree(tree_root, undoManager);
                     }else{
                         project_id = pid;
                         project_name = response.pname;
@@ -607,6 +566,46 @@ function save_project(){
     }
 }
 
+function save_project1(deletedpro){
+    console.log("code in save1");
+    console.log("value of tree_node: " + deletedpro);
+    if(deletedpro != null){
+        console.log("eneterd if");
+        $.ajax({
+            'url': '/save_project',
+            'type': 'POST',
+            'contentType': 'application/json',
+            'data': JSON.stringify({
+                'pname': 'copy',
+                'fw': copyArray(treeNode)
+                }),
+            'success': function (response) {
+                //console.log(response);
+                //console.log(dataObj[0].pname);
+                //console.log(dataObj[0]);
+                //console.log(dataObj.pname);
+                displayToastMessage('Project saved successfully with name copy');
+                if(is_existing_saved){
+                    $('.project-exists').modal('toggle');
+                    $('.overlay').remove();
+                    $('.create-project-modal').modal('toggle');
+                }
+                is_existing_saved = false;
+                // tree_root = null;
+                // tree_nodes = null;
+            },
+            'error': function(request, status, error){
+                displayToastMessage('Project could not be saved.');
+                is_existing_saved = false;
+            },
+            'timeout': 5000//timeout of the ajax call
+        });
+    }else{
+        displayToastMessage('No project in the workflow to save');
+    }
+}
+
+
 function discard_project(){
     //Clear the SVG element
     $('.overlay').remove();
@@ -616,15 +615,44 @@ function discard_project(){
     project_name = null;
     project_id = -1;
 }
+var deletedpro = null;
+var treeNode = null;
+//var dataObj = null;
 
-function delete_project(){    
+function delete_project(){ 
+       
     if(tree_root != null){
+        deletedpro = tree_root;
+        treeNode = tree_nodes;
         if(project_id == -1){
             //When a new project is created but has not been saved yet
             discard_project();
             displayToastMessage('Project cleared from workspace');
+            undoManager.add({
+                undo: function () {
+                    console.log("time to recreate project");
+                    //console.log("value of deletion: " + deletion);
+                    save_project1();
+                }
+                // redo: function () {
+                //     console.log("inside redo function");
+                //     delete_project();
+                // }
+            });
             return;
         }else{
+            undoManager.add({
+                undo: function () {
+                    console.log("time to recreate project");
+                    console.log("value of deletion: " + deletedpro);
+                    //console.log("project_name: " + data.pname);
+                    save_project1(deletedpro);
+                }
+                // redo: function () {
+                //     console.log("inside redo function");
+                //     delete_project();
+                // }
+            });
             $.ajax({
                 'url': '/delete_project',
                 'type': 'POST',
@@ -634,9 +662,12 @@ function delete_project(){
                     'pid': project_id
                 }),
                 'success': function(response){
+                    //dataObj = JSON.parse(response);
+                    //console.log("dataObj: " + dataObj);
                     displayToastMessage(response);
                     //Reset the canvas and global variables
                     discard_project();
+                    
                 },
                 'error': function(request, status, error){
                     displayToastMessage('Project could not be deleted.');

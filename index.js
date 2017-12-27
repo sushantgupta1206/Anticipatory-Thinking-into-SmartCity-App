@@ -9,12 +9,9 @@ var mysql = require('mysql');
 var config = require('./config/config');
 var app = express();
 var port = process.env.PORT || 8080;
-
 var passport = require('passport');
 var flash = require('connect-flash');
-
 require('./config/passport')(passport);
-
 var connection = mysql.createConnection({
     'host': config.host,
     'user': config.username,
