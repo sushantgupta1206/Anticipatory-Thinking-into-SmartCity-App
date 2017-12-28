@@ -51,6 +51,11 @@ module.exports = function(app, passport) {
         failureRedirect: '/'
     }));
 
+    app.get('/faq', function(req, res){
+        console.log('Render Help page');
+        res.render('faq.ejs');
+    });
+
 /*
     app.get('/register', function(req, res){
         console.log("Going to render signup page");
@@ -614,16 +619,88 @@ module.exports = function(app, passport) {
 
     app.post('/view_policies', function(req, res){
         console.log('View policies request');
-        connection.query("select * from policies", function(err, result){
+        connection.query("select * from policies where powner='" + req.user.username + "'", function(err, result){
             if(err){
                 res.status(500).send('Failed to retrieve policies');                
             }else{
-                console.log(result);
                 var response = {
                     status: 200,
                     data: result,
                 }
                 res.end(JSON.stringify(response)); 
+            }
+        });
+    });
+
+    app.get('/delete_account', function(req, res){
+        console.log('Preparing to delete users account');
+        username = req.user.username;
+        console.log(username);
+        var del_query = "delete from conseq_policies where pid in (select p.pid from projects p where p.powner='" + username + "')";
+        console.log(del_query);
+        connection.query(del_query, function(err, resp){
+            if(err){
+                console.log(err);
+                res.status(500).send("Failed to delete conseq policies");
+            }else{
+                console.log('Going to delete consequences');
+                del_query = "delete from consequences where pid in (select p.pid from projects p where p.powner='" + username + "')";
+                console.log(del_query);
+                connection.query(del_query, function(err, resp){
+                    if(err){
+                        res.status(500).send("Failed to delete consequences");
+                    }else{
+                        console.log('Going to delete projects list');
+                        connection.query("delete from projects where powner='" + username +"'", function(error, resp){
+                            if(error){
+                                console.log(error);
+                                res.status(500).send("Failed to delete projects");
+                            }else{
+                                console.log("Going to delete user info")
+                                connection.query("delete from users where username='" + username +"'", function(error, resp){
+                                    if(error){
+                                        console.log(error);
+                                        res.status(500).send("Failed to delete user info");
+                                    }else{
+                                        console.log('Deleted user');
+                                        req.logout();
+                                        res.redirect('/');
+                                    }
+                                });                  
+                            }
+                        });
+                    }
+                });                
+            }
+        });
+    });
+
+    app.post('/add_policy', function(req, res){
+        console.log('Adding policy section');
+        var username = req.user.username;
+        console.log(req.body);
+        var data = req.body;
+        console.log(data.pid);
+        console.log(username);
+        connection.query("select * from policies where policyid='" + data.pid + "' and powner='" + username + "'", function(error, resp){
+            if(error){
+                res.status(500).send("Failed to add policy");
+            }else if(resp.length){
+                res.status(500).send('Policy with same identifier already exists');
+            }else{
+                console.log('Inside');
+                connection.query('insert into policies(policyid, policy_name, policy_category, policy_desc, powner) values (?,?,?,?,?)', [data.pid, data.pname, data.pcat, data.pdesc, username], function(error, result){
+                    if(error){
+                        console.log(error);
+                        res.status(500).send("Failed to add policy");
+                    }else{
+                        var response = {
+                            status: 200                            
+                        }
+                        console.log('Policy added successfully');
+                        res.end(JSON.stringify(response));
+                    }
+                });
             }
         });
     });

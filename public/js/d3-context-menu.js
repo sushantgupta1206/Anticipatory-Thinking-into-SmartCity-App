@@ -28,10 +28,12 @@ d3.contextMenu = function (menu, openCallback) {
 					return '<hr/>';
 				var str = "<span>";
 				if(d.title === "Create new consequence"){
-					str = "<span data-toggle = 'modal' data-target = '#createNewModal'>";
+					str = "<span class='create-con-option'>";
 				}else if(d.title === "Edit consequence"){
 					str = "<span class='edit-con-option'>";
-				}				
+				}else if(d.title === "Delete consequence"){
+					str = "<span class='delete-con-option'>";
+				}
 				return (typeof d.title === 'string') ? str + d.title + "</span>" : str + d.title(data) + "</span>";
 			})
 			.on('click', function(d, i) {

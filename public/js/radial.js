@@ -291,6 +291,7 @@ function draw_tree(treeData, undoManager){
             title: 'Create new consequence',
             action: function(elm, d, i, undoManager) {
                 console.log('Create child node');
+                $('#createNewModal').modal({backdrop: 'static', keyboard: false, show: true});
                 console.log("value of elm: " + elm );
                 console.log("value of d: " + d);
                 console.log("value of i: " + i);
@@ -312,7 +313,8 @@ function draw_tree(treeData, undoManager){
                 if(d.root_ind){
                     $('.cannot-edit').modal('toggle');
                 }else{
-                    $('#editModal').modal('toggle');
+                    $('#editModal').modal({backdrop: 'static', keyboard: false, show: true});
+                    //$('#editModal').modal('toggle');
                     $('.con-edit-policies').html(generatePolicies(d.policies, "edit-tagged-policy"));
                     $("#renamedEffectName").val(d.name);
                     $('#edit-con-comment').val(d.notes);
@@ -431,7 +433,6 @@ function draw_tree(treeData, undoManager){
                 undo: function () {
                     console.log("time to add node after delete");
                     console.log("value of node: " + node);
-                    //draw_tree(node);
                     creation(ELM, D,I, undoManager);
                     //create_node_again(D, undoManager)
                 }

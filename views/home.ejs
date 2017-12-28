@@ -40,7 +40,7 @@
                     </div>
                     <div class="form-group">
                         <label for="root-node-name">Change, Event or Decision</label>
-                        <input type="text" name="root-node-name" class="form-control" id="rootNodeName" maxlength="30" placeholder="Main change, event or decision to be explored" required>                        
+                        <input type="text" name="root-node-name" class="form-control" id="rootNodeName" maxlength="100" placeholder="Main change, event or decision to be explored" required>                        
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -83,7 +83,7 @@
                 </div>
                 <div class="modal-body">
                     <div class="form-group form-group-con-type-disable">
-                        <input type="text" class="form-control" id="newEffectName" placeholder="Consequence Name" maxlength="30">                        
+                        <input type="text" class="form-control" id="newEffectName" placeholder="Consequence Name" maxlength="100">                        
                     </div>                                          
                     <div class="con-new-policies">                        
                     </div>                    
@@ -141,7 +141,7 @@
                 </div>
                 <div class="modal-body">
                     <div class="form-group form-group-con-type-disable">
-                        <input type="text" class="form-control" id="renamedEffectName" placeholder="Consequence" maxlength="30">                        
+                        <input type="text" class="form-control" id="renamedEffectName" placeholder="Consequence" maxlength="100">                        
                     </div>
                     <div class="con-edit-policies">                        
                     </div>                    
@@ -260,6 +260,41 @@
         </div>
     </div>
 
+    <div id="addPolicyModal" class="modal fade" role="dialog">
+        <div class="modal-dialog">
+            <!-- Modal content-->
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">Add new Policy</h4>
+                </div>
+                <div class="error-msg"></div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="newPolicyIdentifier">Policy Identifier:</label>
+                        <input type="text" class="form-control" id="newPolicyIdentifier" placeholder="Policy Identifier" pattern="[a-zA-Z][a-zA-Z0-9\s]+" maxlength="10">                        
+                    </div>                                          
+                    <div class="form-group">
+                        <label for="newPolicyName">Policy Name:</label>
+                        <input type="text" class="form-control" id="newPolicyName" placeholder="Policy Name" pattern="[a-zA-Z][a-zA-Z0-9\s]+" maxlength="50" >                        
+                    </div>                                          
+                    <div class="form-group">
+                        <label for="newPolicyCategory">Policy Category:</label>
+                        <input type="text" class="form-control" id="newPolicyCategory" placeholder="Policy Category" pattern="[a-zA-Z][a-zA-Z0-9\s]+" maxlength="50">                        
+                    </div>                                          
+                    <div class="form-group">
+                        <label for="policy-desc">Policy Description:</label>
+                        <textarea class="form-control" rows="5" id="policy-desc" pattern="[a-zA-Z][a-zA-Z0-9\s]+" maxlength="500"></textarea>
+                    </div>                                        
+                </div>
+                <div class="modal-footer">
+                    <button id='CancelCreateForm' type="button" class="btn btn-danger" data-dismiss="modal">Cancel</button>
+                    <button id='CreatePolicy' type="button" class="btn btn-success">Add Policy</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div id="snackbar"></div> <!-- Display toast messages in this container -->
 
     <div id="tree-container" class="container">
@@ -285,7 +320,7 @@
                         <a href="javascript:void(0)" id='fw-create-new' class="list-group-item">
                             <span class="glyphicon glyphicon-plus glyphicon-margin"></span>Create New Project</a>
                         <a href="javascript:void(0)" id='fw-view-items' class="list-group-item">
-                            <span class="glyphicon glyphicon-saved glyphicon-margin"></span>View Saved items</a>
+                            <span class="glyphicon glyphicon-saved glyphicon-margin"></span>Load Project</a>
                         <a href="javascript:void(0)" id='fw-save-project' class="list-group-item">
                             <span class="glyphicon glyphicon-save glyphicon-margin"></span>Save Project</a>
                         <a href="javascript:void(0)" id='fw-delete-project' class="list-group-item">
@@ -296,6 +331,8 @@
                             <span class="glyphicon glyphicon-export glyphicon-margin"></span>Export Project</a>
                         <a href="javascript:void(0)" id="fw-view-policies" class="list-group-item">
                             <span class="glyphicon glyphicon-list-alt glyphicon-margin"></span>View Policies</a>
+                        <a href="javascript:void(0)" id="fw-add-policies" class="list-group-item">
+                            <span class="glyphicon glyphicon-plus-sign glyphicon-margin"></span>Add Policies</a>
                         <a href="javascript:void(0)" id="fw-undo-action" class="list-group-item">
                             <span class="glyphicon glyphicon-backward glyphicon-margin"></span>Undo</a>
                         <!-- <a href="javascript:void(0)" id="fw-redo-action" class="list-group-item">
@@ -306,9 +343,9 @@
                     <div class="list-group">
                         <a href="javascript:void(0)" class="list-group-item">
                             <span class="glyphicon glyphicon-cog glyphicon-margin"></span>Manage app settings</a>
-                        <a href="javascript:void(0)" class="list-group-item">
-                            <span class="glyphicon glyphicon-user glyphicon-margin"></span>Manage account Information</a>
-                        <a href="javascript:void(0)" class="list-group-item">
+                        <a href="/delete_account" id="fw-delete-account" class="list-group-item">
+                            <span class="glyphicon glyphicon-user glyphicon-margin"></span>Delete account Information</a>
+                        <a href="/faq" class="list-group-item" target="_blank">
                             <span class="glyphicon glyphicon-question-sign glyphicon-margin"></span>View FAQ/Help Page</a>
                         <a href="javascript:void(0)" id="fw-logout" class="list-group-item">
                             <span class="glyphicon glyphicon-log-out glyphicon-margin"></span>Logout</a>

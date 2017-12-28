@@ -1,3 +1,5 @@
+CREATE DATABASE  IF NOT EXISTS `fw` /*!40100 DEFAULT CHARACTER SET utf8 */;
+USE `fw`;
 -- MySQL dump 10.13  Distrib 5.7.17, for Win64 (x86_64)
 --
 -- Host: localhost    Database: fw
@@ -49,24 +51,23 @@ DROP TABLE IF EXISTS `consequences`;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `consequences` (
   `cid` int(11) NOT NULL AUTO_INCREMENT,
-  `name` varchar(30) NOT NULL,
+  `name` varchar(100) DEFAULT NULL,
   `cnodeid` int(11) DEFAULT NULL,
   `cparentnodeid` int(11) DEFAULT NULL,
   `likelihood` int(11) DEFAULT NULL,
   `impact` varchar(10) DEFAULT NULL,
   `importance` varchar(8) DEFAULT NULL,
-  `notes` varchar(250) DEFAULT NULL,
+  `notes` varchar(1000) DEFAULT NULL,
   `pid` int(11) DEFAULT NULL,
   PRIMARY KEY (`cid`),
   KEY `pid` (`pid`),
   CONSTRAINT `consequences_ibfk_1` FOREIGN KEY (`pid`) REFERENCES `projects` (`pid`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=103 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Dumping data for table `consequences`
 --
-
 
 
 --
@@ -81,7 +82,8 @@ CREATE TABLE `policies` (
   `policy_name` varchar(50) DEFAULT NULL,
   `policy_category` varchar(30) NOT NULL,
   `policy_desc` varchar(250) DEFAULT NULL,
-  PRIMARY KEY (`policyid`)
+  `powner` varchar(30) NOT NULL,
+  PRIMARY KEY (`policyid`,`powner`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -89,11 +91,6 @@ CREATE TABLE `policies` (
 -- Dumping data for table `policies`
 --
 
-LOCK TABLES `policies` WRITE;
-/*!40000 ALTER TABLE `policies` DISABLE KEYS */;
-INSERT INTO `policies` VALUES ('1.1','Greenhouse Gas Reduction','Environmental Protection','Promote best practices for reducing greenhouse gas emissions'),('1.2','Vehicle Electrification','Environmental Protection','Promote the electrification of transportation, both public and private.'),('1.3','Green Building','Environmental Protection','Advance green building practices in the public and private sectors by encouraging LEED Gold-level certification'),('2.1','Housing Preservation','Housing','Encourage the preservation of existing housing units whenever feasible, especially structures of historic or architectural significance.'),('2.2','Energy Efficiency','Housing','Ensure that all new publicly-supported housing construction and rehabilitation meet energy efficiency standards'),('2.3','Removing Housing Barriers','Housing','Address regulatory and policy barriers to affordable housing development'),('T 3.1','Transit Availability','Transportation','Expand public transit to serve housing in all parts of the City.'),('T 3.2','Integration of Travel Modes','Transportation','Promote and develop an integrated, multi-modal transportation system'),('T 3.3','Lane Additions','Transportation','Consider adding lanes to increase roadway capacity only after the roadway exceeds 20 percent of full capacity');
-/*!40000 ALTER TABLE `policies` ENABLE KEYS */;
-UNLOCK TABLES;
 
 --
 -- Table structure for table `projects`
@@ -110,7 +107,7 @@ CREATE TABLE `projects` (
   PRIMARY KEY (`pid`),
   KEY `powner` (`powner`),
   CONSTRAINT `projects_ibfk_1` FOREIGN KEY (`powner`) REFERENCES `users` (`username`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=20 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -161,4 +158,4 @@ CREATE TABLE `users` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2017-10-12  0:15:09
+-- Dump completed on 2017-12-21 23:45:06

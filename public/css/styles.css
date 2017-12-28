@@ -326,3 +326,7 @@ hr{
 input[type=checkbox]{
 	margin: 5px 5px 0;
 }
+
+.edit-con-option, .create-con-option, .delete-con-option { 
+	cursor: pointer; 
+}
