@@ -4,7 +4,6 @@ var project_id = -1;
 var policies = null;
 var policy_map = {};
 var btnUndo;
-//var btnRedo;
 var undoManager = new UndoManager();
 
 $(document).ready(function(){
@@ -18,13 +17,11 @@ $(document).ready(function(){
         'contentType': 'application/json',
         success: function(response){
             response = JSON.parse(response);
-            //console.log("::::::::::::::::::::::::::::::::::::Printing response: ");
             console.log(response);
             policies = response.data;
             for(var i = 0; i < policies.length; i++){
                 policy_map[policies[i].policyid] = policies[i].policy_name;
             }
-            console.log("Hi this is policy map");
             console.log(policy_map);
         },
         error: function(request, status, error){                
@@ -73,17 +70,12 @@ $(document).ready(function(){
     // });
 
     $("#search-con-button").on('click', function () {
-        console.log("hi in search");
         clearAll(tree_root);
         expandAll(tree_root);
         var search = $('#searchInput').val();
-		console.log("Searching for" + search);
-        console.log(tree_root.name);
-        console.log("value to pass to function: "+ tree_root.name);
-        searchTree(tree_root,search);
+		searchTree(tree_root,search);
         tree_root.children.forEach(collapseAllNotFound);
         outer_update(tree_root);
-        console.log("search flag value :" + consFlag);
         if(consFlag === 0){
             displayToastMessage("Search item not found please try again");
         }
@@ -91,44 +83,26 @@ $(document).ready(function(){
         
     
     $("#search-policy-button").on('click', function () {
-       console.log("hi in search policy");
-       clearAll(tree_root);
-       expandAll(tree_root);
-       var searchPolicy = $('#searchInput').val();
-       console.log("Searching for" + searchPolicy);
-       console.log(" root name: " + tree_root.name);
-       console.log(" tree_root policies : " + tree_root.policies);
-       // searchTreePolicy(d,searchText)
-       console.log("Policy map to search in: ");
-       console.log(policy_map);
-       var keys = [];
-       for(var key in policy_map) {
-           console.log("Inside for loop");
-        var value = policy_map[key].toLowerCase();
-        //console.log(" Key value pair is: " + key + " " + value);
-        
-        if(value && value.includes(searchPolicy.toLowerCase())){
-            console.log("Including key : " + key);
-            keys.push(key);
+        clearAll(tree_root);
+        expandAll(tree_root);
+        var searchPolicy = $('#searchInput').val();
+        var keys = [];
+        for (var key in policy_map) {
+            console.log("Inside for loop");
+            var value = policy_map[key].toLowerCase();
+            if (value && value.includes(searchPolicy.toLowerCase())) {
+                console.log("Including key : " + key);
+                keys.push(key);
+            }
         }
-        // do something with "key" and "value" variables
-       
-      }
-      console.log("keys: " + keys);
-      searchTreePolicy(tree_root, keys);
-      console.log("for collapse all : " + tree_root.children)
-      tree_root.children.forEach(collapseAllNotFound);
-      outer_update(tree_root);
-      if(policyFlag === 0){
-        displayToastMessage("Search item not found in policy list please try again");
-    }
-        console.log("policy of child 1: " + tree_root.children[0].policies);
-});
-
-
-
-    
-    
+        searchTreePolicy(tree_root, keys);
+        tree_root.children.forEach(collapseAllNotFound);
+        outer_update(tree_root);
+        if (policyFlag === 0) {
+            displayToastMessage("Search item not found in policy list please try again");
+        }
+    });
+   
     $('#fw-create-new').on('click', function(){
         if(tree_root){
             //TODO - If a project is already in progress. Decide what needs to be done!   
@@ -141,6 +115,7 @@ $(document).ready(function(){
         }            
     });
 
+    //When create project button is clicked
     $('#CreateProjectForm').on('click', function(){        
         $.ajax({
             url: '/check_project_name',
@@ -188,6 +163,7 @@ $(document).ready(function(){
         save_project();        
     });
 
+    //When user clicks the "Load Project" option in left sidebar
     $('#fw-view-items').on('click', function(){
         console.log('Open Project');
         $.ajax({
@@ -277,6 +253,7 @@ $(document).ready(function(){
         var pcat = $('#newPolicyCategory').val();
         var pdesc = $('#policy-desc').val();
 
+        //Validate the text input entered by the user.
         var i, code;
         for(i = 0; i < pid.length; i++){
             code = pid.charCodeAt(i);
@@ -333,9 +310,8 @@ $(document).ready(function(){
                     'policy_category': pcat,
                     'policy_desc': pdesc
                 });
-                console.log(policies);
-                policy_map[pid] = pname;
-                console.log(policy_map);
+                //Update policy map
+                policy_map[pid] = pname;                
             },
             'error': function(request, status, error){
                 if(request.responseText === 'Policy with same identifier already exists'){
@@ -414,6 +390,7 @@ $(document).ready(function(){
         };      
         img.src = url; 
         */
+        //Make use of pptxgen library to generate slides for each consequence item.
         var pptx = new PptxGenJS();
         var consequencesArr = copyArray(tree_nodes);
         console.log(consequencesArr.length);
@@ -503,17 +480,6 @@ function triggerDownload(imgURI) {
     a.dispatchEvent(evt);
     //document.body.removeChild(a);
 }
-
-function isAlphaNumeric(str) {
-    var code = str.charCodeAt(0);
-    if (!(code > 47 && code < 58) && // numeric (0-9)
-        !(code > 64 && code < 91) && // upper alpha (A-Z)
-        !(code > 96 && code < 123)) { // lower alpha (a-z)
-        return false;
-    }    
-    return true;
-};
-
 
 function isAlphaNumeric(str) {
     var code = str.charCodeAt(0);
@@ -634,6 +600,7 @@ function copyArray(source){
     return result;
 }
 
+//Triggers a d3 click event on the consequence nodes
 jQuery.fn.d3Click = function () {
   this.each(function (i, e) {
     var evt = new MouseEvent("click");
@@ -686,10 +653,7 @@ function save_project(){
 }
 
 function save_project1(deletedpro){
-    console.log("code in save1");
-    console.log("value of tree_node: " + deletedpro);
     if(deletedpro != null){
-        console.log("eneterd if");
         $.ajax({
             'url': '/save_project',
             'type': 'POST',
@@ -699,10 +663,6 @@ function save_project1(deletedpro){
                 'fw': copyArray(treeNode)
                 }),
             'success': function (response) {
-                //console.log(response);
-                //console.log(dataObj[0].pname);
-                //console.log(dataObj[0]);
-                //console.log(dataObj.pname);
                 displayToastMessage('Project saved successfully with name copy');
                 if(is_existing_saved){
                     $('.project-exists').modal('toggle');
@@ -710,8 +670,6 @@ function save_project1(deletedpro){
                     $('.create-project-modal').modal('toggle');
                 }
                 is_existing_saved = false;
-                // tree_root = null;
-                // tree_nodes = null;
             },
             'error': function(request, status, error){
                 displayToastMessage('Project could not be saved.');
@@ -749,8 +707,6 @@ function delete_project(){
             displayToastMessage('Project cleared from workspace');
             undoManager.add({
                 undo: function () {
-                    console.log("time to recreate project");
-                    //console.log("value of deletion: " + deletion);
                     save_project1();
                 }
                 // redo: function () {
@@ -762,9 +718,6 @@ function delete_project(){
         }else{
             undoManager.add({
                 undo: function () {
-                    console.log("time to recreate project");
-                    console.log("value of deletion: " + deletedpro);
-                    //console.log("project_name: " + data.pname);
                     save_project1(deletedpro);
                 }
                 // redo: function () {
@@ -781,8 +734,6 @@ function delete_project(){
                     'pid': project_id
                 }),
                 'success': function(response){
-                    //dataObj = JSON.parse(response);
-                    //console.log("dataObj: " + dataObj);
                     displayToastMessage(response);
                     //Reset the canvas and global variables
                     discard_project();
@@ -864,5 +815,3 @@ function generateAlertMessage(msg){
 					msg + '</div>';
 	return html;
 }
-
-//clearInterval(autoSaveFunction);

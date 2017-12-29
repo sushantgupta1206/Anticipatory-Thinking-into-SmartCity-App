@@ -1,3 +1,5 @@
+// Radial Tree code referenced from http://jsfiddle.net/Nivaldo/9TFFw/
+
 var tree_root = null;
 var outer_update = null;
 var outer_click = null;
@@ -73,27 +75,18 @@ function create_node(type, undoManager){
 }
 
 function create_node_again(create, undoManager){ 
-    console.log("code inside create node again ");
-    console.log("value of create node: " + create);
-    console.log("value of node name: " + create.name);
-    
-    console.log("value of undoManager: " + undoManager);
-    console.log("create_node_parent: " + create_node_parent);
     if(create_node_parent){
-        console.log("Code inside 1st if condition");
         if(create_node_parent._children != null){
-            console.log("code inside 2nd if statement");
             create_node_parent.children =create_node_parent._children;
             create_node_parent._children = null;
         }
         if(create_node_parent.children == null){
-            console.log("Code inside 3 rd if condition");
             create_node_parent.children = [];
         }
         var id = ++i;        
         name = create.name;
         var selected_policies = create.policies;
-        console.log("selected policies" + selected_policies);
+        
         var new_node = {
             'name': name,
             'likelihood': create.likelihood,
@@ -107,58 +100,43 @@ function create_node_again(create, undoManager){
             '_children': null
         }
         create1 = new_node;
-        console.log("create1 : " + create1);
-        console.log('Create Node name: ' + name);
-        create_node_parent.children.push(new_node);
-        
+        create_node_parent.children.push(new_node);        
     }
-    console.log("the value for outerupdate is : " + create1);
-    outer_update(create_node_parent);
-    
+    outer_update(create_node_parent);    
 }
 
 
 
-function searchTree(d,searchText) {
-    console.log("code in search tree");
+function searchTree(d, searchText) {
     var searchField = "d.name";
-    console.log("searchField: " + d.name);
-    if (d.children){
-        d.children.forEach(function(dr){
-            searchTree(dr,searchText);
+    if (d.children) {
+        d.children.forEach(function (dr) {
+            searchTree(dr, searchText);
         })
     }
-        else if (d._children){
-    d._children.forEach(function(dr){
-        searchTree(dr,searchText);
-    })
-}
+    else if (d._children) {
+        d._children.forEach(function (dr) {
+            searchTree(dr, searchText);
+        })
+    }
     var searchFieldValue = eval(searchField);
-    console.log("Search text: " + searchText);
-    console.log("searchFieldValue: " + searchFieldValue);
     
     if (searchFieldValue && searchFieldValue.includes(searchText)) {
         consFlag++;
-        //console.log("flag value: " + flag);
-        console.log("if condition passed");    
         // Walk parent chain
-            var ancestors = [];
-            var parent = d;
-            while (typeof(parent) !== "undefined") {
-                ancestors.push(parent);
-		console.log("parent: " + parent);
-                parent.class = "found";
-                parent = parent.parent;
-            }
-        //return ancestors; 
-            console.log("ancestors: " + ancestors);
+        var ancestors = [];
+        var parent = d;
+        while (typeof (parent) !== "undefined") {
+            ancestors.push(parent);
+            parent.class = "found";
+            parent = parent.parent;
+        }
     }
 }
 
 function collapseAllNotFound(d) {
     console.log("code in collapse all");
     if (d.children) {
-        console.log("class of d.class" + d.class);
     	if (d.class !== "found") {
         	d._children = d.children;
         	d._children.forEach(collapseAllNotFound);
@@ -178,7 +156,6 @@ function expandAll(d) {
 }
 
 function clearAll(d) {
-    console.log("inside clearAll");
     d.class = "";
     if (d.children)
         d.children.forEach(clearAll);
@@ -186,45 +163,33 @@ function clearAll(d) {
         d._children.forEach(clearAll);
 }
 
-function searchTreePolicy(d,searchKeys) {
-    console.log("Keys to be searched: " + searchKeys);
-    console.log("code in search tree policy ");
+function searchTreePolicy(d, searchKeys) {
     var searchField = "d.policies";
-    console.log("searchField: " + d.policies);
-    if (d.children){
-        d.children.forEach(function(dr){
-            searchTreePolicy(dr,searchKeys);
+    if (d.children) {
+        d.children.forEach(function (dr) {
+            searchTreePolicy(dr, searchKeys);
         })
     }
-        else if (d._children){
-    d._children.forEach(function(dr){
-        searchTreePolicy(dr,searchKeys);
-    })
-}
+    else if (d._children) {
+        d._children.forEach(function (dr) {
+            searchTreePolicy(dr, searchKeys);
+        })
+    }
     var searchFieldValue = eval(searchField);
-    console.log("Search text: " + searchKeys);
-    console.log("searchFieldValue: " + searchFieldValue);
     for (var i in searchKeys) {
-        //alert(array[i]);
-        console.log(" value of i: " + searchKeys[i]);
         if (searchFieldValue && searchFieldValue.includes(searchKeys[i])) {
             policyFlag++;
-            console.log("if condition passed");    
             // Walk parent chain
-                var ancestors = [];
-                var parent = d;
-                while (typeof(parent) !== "undefined") {
-                    ancestors.push(parent);
-                    console.log("parent: " + parent);
-                    parent.class = "found";
-                    parent = parent.parent;
-                }
-            //return ancestors; 
-                console.log("ancestors: " + ancestors);
+            var ancestors = [];
+            var parent = d;
+            while (typeof (parent) !== "undefined") {
+                ancestors.push(parent);
+                parent.class = "found";
+                parent = parent.parent;
+            }
         }
-    }   
+    }
 }
-
 
 function edit_node(){
     if(node_to_edit && edit_modal_active){
@@ -253,9 +218,6 @@ function edit_node(){
 }
 
 function draw_tree(treeData, undoManager){
-    console.log("value of treedata :" + treeData);
-    console.log("value of undoManager :" + undoManager);
-    
     // Calculate total nodes, max label length
     var totalNodes = 0;
     var maxLabelLength = 0;
@@ -276,25 +238,14 @@ function draw_tree(treeData, undoManager){
     var diameter = 800;
     
     function creation(ELM, D, I, undoManager){
-        console.log('Inside creation function Create child node');
-        console.log("value of ELM: " + ELM );
-        console.log("value of D: " + D);
-        console.log("value of I: " + I);
-        create_node_parent = D.parent; //D.parent.name                            
-        //create_node_modal_active = true; 
-        console.log("reaches here"); 
-        create_node_again(D, undoManager);
-        //outer_update();
+        create_node_parent = D.parent; 
+        create_node_again(D, undoManager);        
     }
     var menu = [
         {
             title: 'Create new consequence',
             action: function(elm, d, i, undoManager) {
-                console.log('Create child node');
                 $('#createNewModal').modal({backdrop: 'static', keyboard: false, show: true});
-                console.log("value of elm: " + elm );
-                console.log("value of d: " + d);
-                console.log("value of i: " + i);
                 create_node_parent = d;                            
                 create_node_modal_active = true;  
                 $('.con-new-policies').html(generatePolicies([], "new-tagged-policy"));              
@@ -314,7 +265,6 @@ function draw_tree(treeData, undoManager){
                     $('.cannot-edit').modal('toggle');
                 }else{
                     $('#editModal').modal({backdrop: 'static', keyboard: false, show: true});
-                    //$('#editModal').modal('toggle');
                     $('.con-edit-policies').html(generatePolicies(d.policies, "edit-tagged-policy"));
                     $("#renamedEffectName").val(d.name);
                     $('#edit-con-comment').val(d.notes);
@@ -351,24 +301,6 @@ function draw_tree(treeData, undoManager){
                 }
             }
         }                
-    ];
-
-    var root_node_menu = [
-        {
-            title: 'Create new consequence',
-            action: function(elm, d, i) {
-                console.log('Create child node1');
-                create_node_parent = d;                            
-                create_node_modal_active = true;
-                $('#CreateNodeName').focus();
-            }
-        },
-        {
-            title: 'Get suggestions',
-            action: function(elm, d, i) {
-                console.log('Clicked get suggestions');                   
-            }
-        }
     ];
 
     var tree = d3.layout.tree()
