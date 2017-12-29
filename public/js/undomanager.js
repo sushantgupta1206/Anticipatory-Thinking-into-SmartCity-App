@@ -1,7 +1,3 @@
-/*
-Simple Javascript undo and redo.
-https://github.com/ArthurClemens/Javascript-Undo-Manager
-*/
 
 ;(function() {
 
