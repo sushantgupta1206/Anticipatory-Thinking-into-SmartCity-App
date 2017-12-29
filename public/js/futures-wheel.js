@@ -7,6 +7,7 @@ var btnUndo;
 var undoManager = new UndoManager();
 
 $(document).ready(function(){
+    //Leave the search section disabled initially when no project is there in the workspace.
     $('#searchInput').prop("disabled", true);
     $('#search-con-button').prop("disabled", true);
     $('#search-policy-button').prop("disabled", true);
@@ -55,7 +56,6 @@ $(document).ready(function(){
     
     $('#fw-undo-action').on('click', function(e){
         //e.preventDefault();
-        console.log("in Undo operation");
         undoManager.undo();
         updateUI();       
     });
@@ -88,10 +88,8 @@ $(document).ready(function(){
         var searchPolicy = $('#searchInput').val();
         var keys = [];
         for (var key in policy_map) {
-            console.log("Inside for loop");
             var value = policy_map[key].toLowerCase();
             if (value && value.includes(searchPolicy.toLowerCase())) {
-                console.log("Including key : " + key);
                 keys.push(key);
             }
         }
@@ -165,7 +163,6 @@ $(document).ready(function(){
 
     //When user clicks the "Load Project" option in left sidebar
     $('#fw-view-items').on('click', function(){
-        console.log('Open Project');
         $.ajax({
             'url': '/view_items',
             'type': 'POST',
@@ -393,7 +390,7 @@ $(document).ready(function(){
         //Make use of pptxgen library to generate slides for each consequence item.
         var pptx = new PptxGenJS();
         var consequencesArr = copyArray(tree_nodes);
-        console.log(consequencesArr.length);
+       
         var slide = pptx.addNewSlide();
         slide.addText(
             consequencesArr[0].name,
@@ -498,7 +495,7 @@ function isWhiteSpace(s) {
 function attachEvents(){
     $('.fw-proj-table-row').on('click', function(){
         var pid = $(this).attr('data-pid');        
-        console.log(pid);
+       
         if(pid > 0){
             $.ajax({
                 'url': '/get_fw_project',
@@ -565,11 +562,21 @@ function copyObject(source){
     } else if (typeof(source)=="object") {
         var clone = {};
         for (var prop in source) {
-            if (source.hasOwnProperty(prop) && (prop === 'id' || prop === 'name' || prop === 'impact' || prop === 'importance' || prop === 'likelihood' || prop === 'notes' || prop === 'children' ||  prop === 'root_ind')) {
+            if (source.hasOwnProperty(prop) && (prop === 'id' || prop === 'name' || prop === 'impact' || prop === 'importance' || prop === 'likelihood' || prop === 'notes' || prop === 'children' ||  prop === 'root_ind' || prop === 'policies')) {
                 clone[prop] = copyObject(source[prop]);
             }
+            //When a node is collapsed, the child nodes are stored in the _children property.
+            if (source.hasOwnProperty(prop) && prop === '_children'){
+                clone['children'] = copyObject(source[prop]);
+            }
             if(source.hasOwnProperty(prop) && prop === 'parent'){
-                clone['cparentnodeid'] = source[prop].id;
+                clone['parentid'] = source[prop].id;
+            }
+            if(!('parent' in source)){
+                clone['parentid'] = 0;
+            }
+            if(!('root_ind' in source)){
+                clone['root_ind'] = 0;
             }
         }
         return clone;
@@ -582,7 +589,6 @@ function copyArray(source){
     var result = [];
     for(var i = 0; i < source.length; i++){
         var item = source[i];
-        console.log(item);
         var obj = {};
         obj.id = item.id;
         obj.name = item.name;
@@ -595,8 +601,6 @@ function copyArray(source){
         obj.policies = item.policies;
         result.push(obj);
     }
-    console.log('modified array');
-    console.log(result);
     return result;
 }
 
@@ -638,8 +642,6 @@ function save_project(){
                     $('.create-project-modal').modal('toggle');
                 }
                 is_existing_saved = false;
-                // tree_root = null;
-                // tree_nodes = null;
             },
             'error': function(request, status, error){
                 displayToastMessage('Project could not be saved.');
@@ -782,8 +784,6 @@ function generatePolicies(selected, policyClass){ //policyClass will be used to 
 }
 
 var autoSaveFunction = setInterval(function(){
-    console.log('Auto-Save function called');
-    console.log(tree_nodes);
     if(tree_root !== null){
         $.ajax({
             'url': '/save_project',

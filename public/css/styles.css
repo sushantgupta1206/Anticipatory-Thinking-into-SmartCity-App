@@ -330,3 +330,9 @@ input[type=checkbox]{
 .edit-con-option, .create-con-option, .delete-con-option { 
 	cursor: pointer; 
 }
+
+.con-new-policies, .con-edit-policies{
+	max-height: 300px;
+    overflow-y: auto;
+    margin-top: 8px;
+}

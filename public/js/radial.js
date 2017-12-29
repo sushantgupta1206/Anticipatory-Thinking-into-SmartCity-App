@@ -1,9 +1,9 @@
 // Radial Tree code referenced from http://jsfiddle.net/Nivaldo/9TFFw/
 
-var tree_root = null;
+var tree_root = null; //Store the consequence tree or the futures wheel object
 var outer_update = null;
 var outer_click = null;
-var tree_nodes = null;
+var tree_nodes = null; //Stores all the nodes in the consequence tree
 var found_count = 0;
 
 var create_node_parent = null;
@@ -21,9 +21,6 @@ var I = null;
 var create1 = {};
 var source1 = null;
 function create_node(type, undoManager){ 
-    console.log("code inside create node");
-    console.log("value of type: " + type);
-    console.log("value of undoManager: " + undoManager);
     if(create_node_parent && create_node_modal_active){
         if(create_node_parent._children != null){
             create_node_parent.children =create_node_parent._children;
@@ -51,16 +48,12 @@ function create_node(type, undoManager){
             'children': [],
             '_children': null
         }
-        console.log('Create Node name: ' + new_node);
         create_node_parent.children.push(new_node);
-        console.log("create_node_parent.children: "  + create_node_parent.children);
         create_node_modal_active = false;
         $('#newEffectName').val('');        
         $('#createNewModal').modal('toggle');
         undoManager.add({
             undo: function () {
-                console.log("time to delete node");
-                console.log("value of type: " + new_node);
                 outer_delete_node(new_node);
             }
             // redo: function () {
@@ -69,7 +62,6 @@ function create_node(type, undoManager){
             // }
         });
     }
-    console.log("contents of create node parent :" + create_node_parent);
     outer_update(create_node_parent);
     
 }
@@ -135,7 +127,6 @@ function searchTree(d, searchText) {
 }
 
 function collapseAllNotFound(d) {
-    console.log("code in collapse all");
     if (d.children) {
     	if (d.class !== "found") {
         	d._children = d.children;
@@ -203,7 +194,6 @@ function edit_node(){
         node_to_edit.notes = $('#edit-con-comment').val();
         node_to_edit.likelihood = $('#edit-con-likelihood').val();
         edit_modal_active = false;
-        console.log(node_to_edit);
         $('#editModal').modal('toggle');
     }    
     //Add time delay here.
@@ -345,8 +335,6 @@ function draw_tree(treeData, undoManager){
     });
 
     function delete_node(node) {
-        console.log("In delete node");
-        console.log("Value of node recievec: " + node);
         visit(treeData, function (d) {
             if (d.children) {
                 for (var child of d.children) {
@@ -358,13 +346,11 @@ function draw_tree(treeData, undoManager){
                 }
             }
         },
-            function (d) {
-                return d.children && d.children.length > 0 ? d.children : null;
-            });
+        function (d) {
+            return d.children && d.children.length > 0 ? d.children : null;
+        });
         undoManager.add({
                 undo: function () {
-                    console.log("time to add node after delete");
-                    console.log("value of node: " + node);
                     creation(ELM, D,I, undoManager);
                     //create_node_again(D, undoManager)
                 }
@@ -644,7 +630,6 @@ function draw_tree(treeData, undoManager){
 
     // Toggle children on click.
     function click(d) {
-        console.log(d);
         if (d3.event.defaultPrevented && d.depth != 0) 
             return; // click suppressed
         d = toggleChildren(d);
@@ -653,17 +638,13 @@ function draw_tree(treeData, undoManager){
 
     function update(source) {
         source1 = source;
-        console.log("source value is: " + source1);
         // Compute the new height, function counts total children of root node and sets tree height accordingly.
         // This prevents the layout looking squashed when new nodes are made visible or looking sparse when nodes are removed
         // This makes the layout more consistent.
-        console.log("code in update after undo");
         var levelWidth = [1];
         var childCount = function (level, n) {
             if (n.children && n.children.length > 0) {
-                console.log("code enters  1st if");
                 if (levelWidth.length <= level + 1) {levelWidth.push(0);
-                console.log("code enters  2nd if");
                 }
                 levelWidth[level + 1] += n.children.length;
                 n.children.forEach(function (d) {
@@ -708,10 +689,14 @@ function draw_tree(treeData, undoManager){
             .attr('data-placement', 'right')
             .attr('data-html', true)
             .attr('data-content', function(d){
+                var pname_list = [];
+                for(var i = 0; i < d.policies.length; i++){
+                    pname_list.push(policy_map[d.policies[i]]);
+                }
                 if(!d.root_ind)
                     return "<span class='popover-labels'>Impact: </span>" + d.impact.toUpperCase() + "<br/>" +
                     "<span class='popover-labels'>Notes: </span>" + d.notes + "<br/>" +
-                    "<span class='popover-labels'>Policies: </span>" + d.policies + "<br/>" +
+                    "<span class='popover-labels'>Policies: </span>" + pname_list + "<br/>" +
                     "<span class='popover-labels'>Likelihood: </span>" + d.likelihood + "<br/>" +                    
                     "<span class='popover-labels'>Importance: </span>" + d.importance.toUpperCase() + "<br/>";
             });
@@ -862,8 +847,10 @@ function draw_tree(treeData, undoManager){
             'container': 'body'            
         });
 
-        tree_nodes = nodes;
-        console.log("The current tree_node is : " + tree_nodes);
+        //This is to ensure that all consequences are picked up while saving correctly
+        var xyz = copyObject(tree_root);
+        xyz = d3.layout.tree().nodes(xyz);
+        tree_nodes = xyz;
     }
 
     // Append a group which holds all nodes and which the zoom Listener can act upon.
@@ -879,8 +866,8 @@ function draw_tree(treeData, undoManager){
     outer_toggle = toggleChildren;
     outer_delete_node = delete_node;
     // Layout the tree initially and center on the root node.
-    update(root);
-    tree_root = root;    
+    tree_root = root; 
+    update(root);       
     d3.select(self.frameElement).style("height", width);
 }
 
