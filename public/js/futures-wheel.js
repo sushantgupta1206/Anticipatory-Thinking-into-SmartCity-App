@@ -54,6 +54,7 @@ $(document).ready(function(){
     }
 
     undoManager.setCallback(updateUI);
+    undoManager.setLimit(3);
     
     $('#fw-undo-action').on('click', function(e){
         //e.preventDefault();
